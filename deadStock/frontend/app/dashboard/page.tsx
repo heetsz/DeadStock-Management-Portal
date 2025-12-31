@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { RefreshCcw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LabelList } from "recharts"
 
 export default function DashboardPage() {
   const [autoRefresh, setAutoRefresh] = useState(false)
@@ -172,26 +172,41 @@ export default function DashboardPage() {
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-indigo-600" /> Cost Breakdown
             </CardTitle>
-            <Badge className="bg-gray-100 text-gray-700">₹ Rupees</Badge>
+            <Badge className="bg-gray-100 text-gray-700">INR (₹)</Badge>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={[
-                    { name: "Original", value: stats?.total_original_cost ?? 0 },
-                    { name: "Current", value: stats?.total_current_cost ?? 0 },
-                  ]}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(v) => `₹${Number(v).toLocaleString()}`} />
-                  <Tooltip formatter={(v) => `₹${Number(v).toLocaleString()}`} />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {(() => {
+              const original = Number(stats?.total_original_cost ?? 0) || 0
+              const current = Number(stats?.total_current_cost ?? 0) || 0
+              const data = [
+                { name: "Original", value: original },
+                { name: "Current", value: current },
+              ]
+
+              return (
+                <div className="space-y-4">
+                  {/* Numeric legend for clarity */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <LegendItem color="#6366f1" label="Original" value={original} percent={0} />
+                    <LegendItem color="#3b82f6" label="Current" value={current} percent={0} />
+                  </div>
+
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis tickFormatter={(v) => formatINR(v)} />
+                        <Tooltip formatter={(v) => formatINR(Number(v))} />
+                        <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]}>
+                          <LabelList dataKey="value" position="top" formatter={(v: any) => formatINR(Number(v))} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
       </div>
@@ -234,6 +249,14 @@ function timeAgo(date: Date) {
   if (diff < 60) return `${Math.floor(diff)}s ago`
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
   return `${Math.floor(diff / 3600)}h ago`
+}
+
+function formatINR(v: number) {
+  try {
+    return `₹${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+  } catch {
+    return `₹${v}`
+  }
 }
 
 function LegendItem({
