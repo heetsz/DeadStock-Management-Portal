@@ -70,7 +70,7 @@ export default function Home() {
           <div className="flex items-center gap-3 px-4 py-4">
             <Link href="/" className="flex items-center gap-3">
               <div className="relative h-10 w-10 shrink-0">
-                <Image src="/logo.svg" alt="Company Logo" fill priority sizes="40px" className="rounded-lg" />
+                <Image src="/image.png" alt="Company Logo" fill priority sizes="40px" className="rounded-lg" />
               </div>
               <div className={(collapsed ? "hidden " : "") + "leading-tight"}>
                 <div className="text-base font-semibold text-gray-900">SPIT CE</div>

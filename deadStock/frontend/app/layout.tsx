@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Deadstock & Asset Management System',
   description: 'Computer Department Deadstock Register Management',
+  icons: {
+    icon: '/image.png',
+  },
 }
 
 export default function RootLayout({
@@ -23,4 +26,3 @@ export default function RootLayout({
     </html>
   )
 }
-

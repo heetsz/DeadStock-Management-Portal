@@ -1,108 +1,260 @@
-'use client'
+"use client"
 
-import { useQuery } from 'react-query'
-import api from '@/lib/api'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts'
+import { useEffect, useMemo, useState } from "react"
+import { useQuery } from "react-query"
+import api from "@/lib/api"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { RefreshCcw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 
 export default function DashboardPage() {
-  const { data: stats, isLoading } = useQuery('dashboard', async () => {
-    const res = await api.get('/reports/dashboard')
-    return res.data
-  })
+  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>
-  }
+  const {
+    data: stats,
+    isLoading,
+    isFetching,
+    refetch,
+    error,
+  } = useQuery(
+    "dashboard",
+    async () => {
+      const res = await api.get("/reports/dashboard")
+      return res.data
+    },
+    {
+      onSuccess: () => {
+        setLastUpdated(new Date())
+        toast.success("Dashboard data refreshed", {
+          description: `Last updated at ${new Date().toLocaleTimeString()}`,
+        })
+      },
+      onError: (err: any) => {
+        toast.error("Failed to load dashboard", {
+          description: err?.response?.data?.detail ?? "Please try again",
+        })
+      },
+      refetchOnWindowFocus: false,
+    }
+  )
 
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+  useEffect(() => {
+    if (!autoRefresh) return
+    const id = setInterval(() => refetch(), 60_000) // 60s
+    return () => clearInterval(id)
+  }, [autoRefresh, refetch])
+
+  const COLORS = useMemo(() => ({ assigned: "#3b82f6", scrapped: "#ef4444", available: "#10b981" }), [])
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Total Assets</div>
-          <div className="text-3xl font-bold">{stats?.total_assets || 0}</div>
+    <div className="space-y-6">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600">Overview of deadstock & asset metrics</p>
         </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Total Quantity Purchased</div>
-          <div className="text-3xl font-bold">{stats?.total_quantity_purchased || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Total Original Cost</div>
-          <div className="text-3xl font-bold">₹{stats?.total_original_cost?.toLocaleString() || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Total Current Cost</div>
-          <div className="text-3xl font-bold">₹{stats?.total_current_cost?.toLocaleString() || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Assigned Quantity</div>
-          <div className="text-3xl font-bold">{stats?.total_assigned_quantity || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Scrapped Quantity</div>
-          <div className="text-3xl font-bold">{stats?.total_scrapped_quantity || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Available Quantity</div>
-          <div className="text-3xl font-bold">{stats?.total_available_quantity || 0}</div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-sm text-gray-600 mb-2">Assets Shared</div>
-          <div className="text-3xl font-bold">{stats?.assets_with_multiple_teachers || 0}</div>
+        <div className="flex items-center gap-3">
+          <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-200">
+            {isFetching ? "Refreshing…" : lastUpdated ? `Updated ${timeAgo(lastUpdated)}` : "Just loaded"}
+          </Badge>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+              className="h-4 w-4"
+            />
+            Auto-refresh
+          </label>
+          <Button
+            onClick={() => refetch()}
+            variant="secondary"
+            aria-label="Refresh dashboard"
+          >
+            <RefreshCcw className="h-4 w-4 mr-2" /> Refresh
+          </Button>
         </div>
       </div>
 
-      {/* Charts Placeholder */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Quantity Distribution</h2>
-          <PieChart width={400} height={300}>
-            <Pie
-              data={[
-                { name: 'Assigned', value: stats?.total_assigned_quantity || 0 },
-                { name: 'Scrapped', value: stats?.total_scrapped_quantity || 0 },
-                { name: 'Available', value: stats?.total_available_quantity || 0 },
-              ]}
-              cx={200}
-              cy={150}
-              labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {[0, 1, 2].map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </div>
+      {/* Errors */}
+      {error && (
+        <Card className="border-red-200">
+          <CardHeader>
+            <CardTitle className="text-red-700">Error loading dashboard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-red-600">Please check backend availability and try again.</p>
+              <Button variant="destructive" onClick={() => refetch()}>Retry</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Cost Breakdown</h2>
-          <BarChart width={400} height={300} data={[
-            { name: 'Original', value: stats?.total_original_cost || 0 },
-            { name: 'Current', value: stats?.total_current_cost || 0 },
-          ]}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip formatter={(value) => `₹${Number(value).toLocaleString()}`} />
-            <Bar dataKey="value" fill="#3b82f6" />
-          </BarChart>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="Total Assets" value={stats?.total_assets ?? 0} />
+        <StatCard label="Quantity Purchased" value={stats?.total_quantity_purchased ?? 0} />
+        <StatCard label="Original Cost" value={stats?.total_original_cost ?? 0} currency />
+        <StatCard label="Current Cost" value={stats?.total_current_cost ?? 0} currency />
+        <StatCard label="Assigned Qty" value={stats?.total_assigned_quantity ?? 0} />
+        <StatCard label="Scrapped Qty" value={stats?.total_scrapped_quantity ?? 0} />
+        <StatCard label="Available Qty" value={stats?.total_available_quantity ?? 0} />
+        <StatCard label="Assets Shared" value={stats?.assets_with_multiple_teachers ?? 0} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5 text-indigo-600" /> Quantity Distribution
+            </CardTitle>
+            <Badge className="bg-gray-100 text-gray-700">Total: {(stats?.total_assigned_quantity ?? 0) + (stats?.total_scrapped_quantity ?? 0) + (stats?.total_available_quantity ?? 0)}</Badge>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const assigned = stats?.total_assigned_quantity ?? 0
+              const scrapped = stats?.total_scrapped_quantity ?? 0
+              const available = stats?.total_available_quantity ?? 0
+              const total = assigned + scrapped + available
+
+              const pct = (v: number, t: number) => (t > 0 ? Math.round((v / t) * 100) : 0)
+
+              if (total === 0) {
+                return <div className="py-6 text-sm text-gray-600">No quantity data yet.</div>
+              }
+
+              return (
+                <div className="space-y-4">
+                  {/* Stacked distribution bar */}
+                  <div
+                    className="h-8 w-full overflow-hidden rounded-md border border-gray-200 bg-gray-50"
+                    role="img"
+                    aria-label={`Assigned ${assigned}, Scrapped ${scrapped}, Available ${available}`}
+                  >
+                    <div
+                      className="h-full inline-block"
+                      style={{ width: `${pct(assigned, total)}%`, backgroundColor: COLORS.assigned }}
+                      title={`Assigned: ${assigned} (${pct(assigned, total)}%)`}
+                    />
+                    <div
+                      className="h-full inline-block"
+                      style={{ width: `${pct(scrapped, total)}%`, backgroundColor: COLORS.scrapped }}
+                      title={`Scrapped: ${scrapped} (${pct(scrapped, total)}%)`}
+                    />
+                    <div
+                      className="h-full inline-block"
+                      style={{ width: `${pct(available, total)}%`, backgroundColor: COLORS.available }}
+                      title={`Available: ${available} (${pct(available, total)}%)`}
+                    />
+                  </div>
+
+                  {/* Legend with values & percentages */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <LegendItem color={COLORS.assigned} label="Assigned" value={assigned} percent={pct(assigned, total)} />
+                    <LegendItem color={COLORS.scrapped} label="Scrapped" value={scrapped} percent={pct(scrapped, total)} />
+                    <LegendItem color={COLORS.available} label="Available" value={available} percent={pct(available, total)} />
+                  </div>
+                </div>
+              )
+            })()}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-indigo-600" /> Cost Breakdown
+            </CardTitle>
+            <Badge className="bg-gray-100 text-gray-700">₹ Rupees</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { name: "Original", value: stats?.total_original_cost ?? 0 },
+                    { name: "Current", value: stats?.total_current_cost ?? 0 },
+                  ]}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis tickFormatter={(v) => `₹${Number(v).toLocaleString()}`} />
+                  <Tooltip formatter={(v) => `₹${Number(v).toLocaleString()}`} />
+                  <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Loading state overlay */}
+      {isLoading && (
+        <Card>
+          <CardContent>
+            <div className="py-10 text-center text-gray-600">Loading dashboard…</div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  currency,
+}: {
+  label: string
+  value: number
+  currency?: boolean
+}) {
+  return (
+    <Card>
+      <CardContent>
+        <div className="text-sm text-gray-600 mb-1">{label}</div>
+        <div className="text-2xl font-semibold text-gray-900">
+          {currency ? `₹${Number(value).toLocaleString()}` : Number(value).toLocaleString()}
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function timeAgo(date: Date) {
+  const diff = (Date.now() - date.getTime()) / 1000
+  if (diff < 60) return `${Math.floor(diff)}s ago`
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  return `${Math.floor(diff / 3600)}h ago`
+}
+
+function LegendItem({
+  color,
+  label,
+  value,
+  percent,
+}: {
+  color: string
+  label: string
+  value: number
+  percent: number
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2">
+      <div className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: color }} />
+        <span className="text-sm text-gray-700">{label}</span>
+      </div>
+      <div className="text-sm font-medium text-gray-900">
+        {value.toLocaleString()} <span className="ml-1 text-gray-500">({percent}%)</span>
       </div>
     </div>
   )
