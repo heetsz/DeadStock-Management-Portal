@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import init_db
 from app.api.v1 import api_router
+from app.core.config import settings
 
 app = FastAPI(
     title="Deadstock & Asset Management System",
@@ -10,9 +11,10 @@ app = FastAPI(
 )
 
 # CORS middleware
+allow_origins = [o.strip() for o in settings.FRONTEND_ORIGINS.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Next.js default ports
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

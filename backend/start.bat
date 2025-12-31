@@ -23,8 +23,14 @@ python seed_data.py
 
 REM Start server
 echo.
-echo Starting FastAPI server on http://localhost:8000
-echo API docs available at http://localhost:8000/docs
+set PORT_DEFAULT=8000
+if not "%PORT%"=="" (
+    set SERVER_PORT=%PORT%
+) else (
+    set SERVER_PORT=%PORT_DEFAULT%
+)
+echo Starting FastAPI server on http://localhost:%SERVER_PORT%
+echo API docs available at http://localhost:%SERVER_PORT%/docs
 echo.
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port %SERVER_PORT%
 
