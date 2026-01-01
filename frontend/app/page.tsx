@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   LayoutDashboard,
   Laptop,
@@ -15,6 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import { supabase } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { LogOut } from "lucide-react"
+import { toast } from "sonner"
 
 type TabKey =
   | "dashboard"
@@ -44,7 +49,7 @@ const navItems: NavItem[] = [
 ]
 
 // Import existing route pages to render inside as inner views
-import DashboardPage from "@/app/dashboard/page"
+import DashboardView from "@/components/pages/DashboardView"
 import AssetsPage from "@/app/assets/page"
 import AssignmentsPage from "@/app/assignments/page"
 import TeachersPage from "@/app/teachers/page"
@@ -56,6 +61,18 @@ import BackupPage from "@/app/backup/page"
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard")
+  const router = useRouter()
+
+  useEffect(() => {
+    let mounted = true
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return
+      if (!data.session) router.replace('/login')
+    })
+    return () => {
+      mounted = false
+    }
+  }, [router])
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -63,7 +80,7 @@ export default function Home() {
         {/* Sidebar */}
         <aside
           className={
-            "group sticky top-0 h-screen bg-white/90 backdrop-blur border-r border-gray-200 shadow-sm transition-all duration-300 " +
+            "group sticky top-0 h-screen bg-white/90 backdrop-blur border-r border-gray-200 shadow-sm transition-all duration-300 flex flex-col " +
             (collapsed ? "w-20" : "w-72")
           }
         >
@@ -108,19 +125,27 @@ export default function Home() {
             })}
           </nav>
 
-          {/* Footer / help */}
-          <div className={(collapsed ? "hidden " : "") + "px-3 py-4 mt-auto text-xs text-gray-500"}>
-            <div className="rounded-md bg-gray-50 border border-gray-200 p-3">
-              <p className="font-medium text-gray-700">Need help?</p>
-              <p>Use the sidebar to navigate modules.</p>
-            </div>
+          {/* Footer */}
+          <div className={(collapsed ? "hidden " : "") + "px-3 py-4 mt-auto"}>
+            <Button
+              variant="destructive"
+              className="w-full justify-start gap-2"
+              onClick={async () => {
+                await supabase.auth.signOut()
+                toast.success("Signed out")
+                router.replace('/login')
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </Button>
           </div>
         </aside>
 
         {/* Main content */}
         <section className="flex-1">
           <div className="px-6 py-6">
-            {activeTab === "dashboard" && <DashboardPage />}
+            {activeTab === "dashboard" && <DashboardView />}
             {activeTab === "assets" && <AssetsPage />}
             {activeTab === "assignments" && <AssignmentsPage />}
             {activeTab === "teachers" && <TeachersPage />}
