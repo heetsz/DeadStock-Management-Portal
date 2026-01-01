@@ -3,8 +3,12 @@
 A full-stack web application for managing and tracking dead stock inventory. Built with modern technologies for both frontend and backend.
 
 **Live Demo:**  
-- [Render](https://deadstock-management-portal.onrender.com)
-- [Vercel](https://dead-stock-management-portal-main-ir1g-3h7ozdl1o.vercel.app)
+<a href="https://deadstock-management-portal.onrender.com" target="_blank" rel="noopener noreferrer">
+Render
+</a>
+- <a href="https://dead-stock-management-portal-main-ir1g-3h7ozdl1o.vercel.app" target="_blank" rel="noopener noreferrer">
+  Vercel
+</a>
 
 ## 📋 Table of Contents
 
