@@ -64,6 +64,20 @@ module.exports = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		keyframes: {
+  			slideInLeft: {
+  				'0%': { opacity: '0', transform: 'translateX(-40px)' },
+  				'100%': { opacity: '1', transform: 'translateX(0)' }
+  			},
+  			slideInRight: {
+  				'0%': { opacity: '0', transform: 'translateX(40px)' },
+  				'100%': { opacity: '1', transform: 'translateX(0)' }
+  			}
+  		},
+  		animation: {
+  			slideInLeft: 'slideInLeft 0.4s ease-out',
+  			slideInRight: 'slideInRight 0.4s ease-out'
   		}
   	}
   },
