@@ -98,7 +98,7 @@ function SignupFormInner() {
 
             <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur">
               <CardHeader className="space-y-2 pb-4">
-                <CardTitle className="text-3xl font-bold text-gray-900">Signup</CardTitle>
+                <CardTitle className="text-4xl font-extrabold text-gray-900">Signup</CardTitle>
                 <p className="text-sm text-gray-600">Sign up with your SPIT email to get started</p>
               </CardHeader>
               <CardContent>
@@ -114,7 +114,7 @@ function SignupFormInner() {
                         onChange={(e) => setFullName(e.target.value)}
                         required
                         className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition-colors bg-gray-50 text-gray-900 placeholder-gray-400"
-                        placeholder="Jane Doe"
+                        placeholder="Full Name"
                       />
                     </div>
                   </div>

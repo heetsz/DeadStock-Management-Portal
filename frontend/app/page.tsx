@@ -61,18 +61,35 @@ import BackupPage from "@/app/backup/page"
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard")
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     let mounted = true
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
-      if (!data.session) router.replace('/login')
+      if (!data.session) {
+        router.replace('/login')
+      } else {
+        setIsLoading(false)
+      }
     })
     return () => {
       mounted = false
     }
   }, [router])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block">
+            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

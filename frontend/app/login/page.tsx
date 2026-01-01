@@ -71,7 +71,7 @@ function LoginFormInner() {
 
             <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur">
               <CardHeader className="space-y-2 pb-4">
-                <CardTitle className="text-3xl font-bold text-gray-900">Login</CardTitle>
+                <CardTitle className="text-4xl font-extrabold text-gray-900">Login</CardTitle>
                 <p className="text-sm text-gray-600">Sign in with your SPIT email to continue</p>
               </CardHeader>
               <CardContent>
