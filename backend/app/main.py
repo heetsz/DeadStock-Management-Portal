@@ -14,7 +14,7 @@ app = FastAPI(
 allow_origins = [o.strip() for o in settings.FRONTEND_ORIGINS.split(",") if o.strip()]
 allow_origins.extend([
     "https://dead-stock-management-portal-main-ir1g-3h7ozdl1o.vercel.app",
-    "https://deadstock-management-portal-main.onrender.com",
+    "https://deadstock-management-portal-main.onrender.com", "https://deadstock-management-portal.onrender.com"
 ])
 app.add_middleware(
     CORSMiddleware,
