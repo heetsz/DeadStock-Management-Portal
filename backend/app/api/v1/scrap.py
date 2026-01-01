@@ -35,7 +35,7 @@ def create_scrap(
 @router.get("", response_model=dict)
 def get_scrap_records(
     asset_id: Optional[str] = None,
-    scrap_phase: Optional[str] = None,
+    phase_id: Optional[str] = Query(None, description="Filter by scrap phase ID"),
     financial_year: Optional[str] = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
@@ -46,7 +46,7 @@ def get_scrap_records(
     """Get scrap records with filters"""
     service = ScrapService()
     return service.get_scrap_records(
-        db, asset_id, scrap_phase, financial_year, date_from, date_to, page, size
+        db, asset_id, phase_id, financial_year, date_from, date_to, page, size
     )
 
 

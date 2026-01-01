@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import date, datetime
 from decimal import Decimal
@@ -6,8 +6,8 @@ from decimal import Decimal
 
 class ScrapBase(BaseModel):
     scrapped_quantity: int
-    scrap_date: date
-    scrap_phase: str  # Phase 1, Phase 2, etc.
+    scrap_date: date = Field(default_factory=date.today)
+    phase_id: str
     remarks: Optional[str] = None
 
 
@@ -23,6 +23,7 @@ class ScrapResponse(ScrapBase):
     
     # Computed fields
     asset_description: Optional[str] = None
+    phase_name: Optional[str] = None
     cumulative_scrapped: Optional[int] = None
     cumulative_value: Optional[Decimal] = None
     
@@ -31,7 +32,8 @@ class ScrapResponse(ScrapBase):
 
 
 class ScrapPhaseSummary(BaseModel):
-    scrap_phase: str
+    phase_id: str
+    phase_name: str
     assets_count: int
     total_quantity_scrapped: int
     total_scrap_value: Decimal

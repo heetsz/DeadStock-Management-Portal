@@ -32,6 +32,8 @@ A full-stack web application for managing and tracking dead stock inventory. Bui
 ### Backend
 - **Framework:** FastAPI (Python 3.11.9)
 - **Runtime:** Python 3.11.9
+- **Database:** MySQL
+- **ORM:** SQLAlchemy
 - **Dependencies:** See `backend/requirements.txt`
 
 ### Frontend
@@ -86,6 +88,7 @@ DeadStock-Management-Portal/
 ### Prerequisites
 
 - **Backend:** Python 3.11.9
+- **Database:** MySQL 8.0+ or MariaDB 10.3+ (installed and running)
 - **Frontend:** Node.js 16+ and npm/yarn
 - **Git:** For version control
 
@@ -101,9 +104,26 @@ DeadStock-Management-Portal/
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file with your configuration (copy from `.env` template if available)
+3. Set up MySQL database:
+   ```bash
+   # Using MySQL command line
+   mysql -u root -p
+   CREATE DATABASE deadstock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   # Or using command:
+   # mysql -u root -p -e "CREATE DATABASE deadstock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   ```
 
-4. Seed the database (optional):
+4. Create a `.env` file in the backend directory with your configuration:
+   ```
+   DATABASE_URL=mysql+pymysql://username:password@localhost:3306/deadstock
+   SECRET_KEY=your-secret-key-change-in-production
+   ALGORITHM=HS256
+   ACCESS_TOKEN_EXPIRE_MINUTES=30
+   FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001
+   ```
+   Replace `username`, `password`, and `localhost:3306` with your MySQL credentials.
+
+5. Seed the database (optional):
    ```bash
    python seed_data.py
    ```
@@ -191,15 +211,27 @@ npm run lint
 
 ### Backend (`.env`)
 ```
-DATABASE_URL=your_database_url
+# MySQL connection string
+# Format: mysql+pymysql://username:password@host:port/database_name
+DATABASE_URL=mysql+pymysql://root:password@localhost:3306/deadstock
 SECRET_KEY=your_secret_key
-DEBUG=true
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
-### Frontend (`.env`)
+### Frontend (`.env.local`)
+Create a `.env.local` file in the `frontend` directory:
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
+
+**Important Notes:**
+- For local development: Create `frontend/.env.local` with the above content
+- For production (Render): Set `NEXT_PUBLIC_API_BASE_URL` in Render Dashboard → Frontend Service → Settings → Environment
+- Only variables starting with `NEXT_PUBLIC_` are accessible in the browser
+- After adding environment variables in Render, you must redeploy the service
+- See `frontend/.env.example` for reference
 
 ## 📚 Project Structure Details
 

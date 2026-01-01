@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date, datetime
 from decimal import Decimal
@@ -7,7 +7,7 @@ from decimal import Decimal
 class AssignmentBase(BaseModel):
     teacher_id: Optional[str] = None
     assigned_quantity: int
-    assignment_date: date
+    assignment_date: date = Field(default_factory=date.today)
     current_location: Optional[str] = None
     remarks: Optional[str] = None
 

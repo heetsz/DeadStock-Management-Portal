@@ -6,8 +6,8 @@ import uuid
 class Category(Base):
     __tablename__ = "category"
     
-    category_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(Text, nullable=False, unique=True)
+    category_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String(255), nullable=False, unique=True)
     is_special = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     

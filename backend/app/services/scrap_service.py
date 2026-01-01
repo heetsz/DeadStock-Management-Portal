@@ -5,7 +5,7 @@ from datetime import date
 from decimal import Decimal
 import math
 
-from app.models import Asset, Scrap
+from app.models import Asset, Scrap, ScrapPhase
 from app.schemas.scrap import ScrapCreate, ScrapResponse, ScrapPhaseSummary
 
 
@@ -58,7 +58,7 @@ class ScrapService:
         scrap = Scrap(
             asset_id=asset_id,
             scrapped_quantity=scrap_data.scrapped_quantity,
-            scrap_phase=scrap_data.scrap_phase,
+            phase_id=scrap_data.phase_id,
             scrap_date=scrap_data.scrap_date,
             scrap_value=scrap_value,
             remarks=scrap_data.remarks
@@ -77,7 +77,7 @@ class ScrapService:
         self,
         db: Session,
         asset_id: Optional[str] = None,
-        scrap_phase: Optional[str] = None,
+        phase_id: Optional[str] = None,
         financial_year: Optional[str] = None,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None,
@@ -92,8 +92,8 @@ class ScrapService:
         if asset_id:
             conditions.append(Scrap.asset_id == asset_id)
         
-        if scrap_phase:
-            conditions.append(Scrap.scrap_phase == scrap_phase)
+        if phase_id:
+            conditions.append(Scrap.phase_id == phase_id)
         
         if financial_year:
             conditions.append(Asset.financial_year == financial_year)
@@ -114,10 +114,11 @@ class ScrapService:
         query = query.order_by(Scrap.scrap_date.desc())
         scraps = query.offset((page - 1) * size).limit(size).all()
         
-        # Enhance with asset info
+        # Enhance with asset and phase info
         result = []
         for scrap in scraps:
             asset = db.query(Asset).filter(Asset.asset_id == scrap.asset_id).first()
+            phase = db.query(ScrapPhase).filter(ScrapPhase.phase_id == scrap.phase_id).first()
             
             # Calculate cumulative values
             cumulative_scrapped = db.query(func.coalesce(func.sum(Scrap.scrapped_quantity), 0)).filter(
@@ -137,6 +138,7 @@ class ScrapService:
             scrap_dict = {
                 **scrap.__dict__,
                 "asset_description": asset.description if asset else None,
+                "phase_name": phase.name if phase else None,
                 "cumulative_scrapped": int(cumulative_scrapped),
                 "cumulative_value": float(cumulative_value)
             }
@@ -152,17 +154,21 @@ class ScrapService:
     def get_phase_summary(self, db: Session) -> List[ScrapPhaseSummary]:
         """Get summary statistics by scrap phase"""
         results = db.query(
-            Scrap.scrap_phase,
+            Scrap.phase_id,
+            ScrapPhase.name,
             func.count(func.distinct(Scrap.asset_id)).label('assets_count'),
             func.sum(Scrap.scrapped_quantity).label('total_quantity'),
             func.sum(Scrap.scrap_value).label('total_value'),
             func.min(Scrap.scrap_date).label('earliest_date'),
             func.max(Scrap.scrap_date).label('latest_date')
-        ).group_by(Scrap.scrap_phase).order_by(Scrap.scrap_phase).all()
+        ).join(ScrapPhase, Scrap.phase_id == ScrapPhase.phase_id
+        ).group_by(Scrap.phase_id, ScrapPhase.name
+        ).order_by(ScrapPhase.name).all()
         
         return [
             ScrapPhaseSummary(
-                scrap_phase=row.scrap_phase,
+                phase_id=row.phase_id,
+                phase_name=row.name,
                 assets_count=row.assets_count,
                 total_quantity_scrapped=int(row.total_quantity) if row.total_quantity else 0,
                 total_scrap_value=Decimal(str(row.total_value)) if row.total_value else Decimal('0'),

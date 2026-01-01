@@ -1,26 +1,88 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from 'react-query'
 import api from '@/lib/api'
 import ReturnModal from '@/components/ReturnModal'
+import AssignmentFilters from '@/components/AssignmentFilters'
 
 export default function AssignmentsPage() {
-  const [activeOnly, setActiveOnly] = useState(true)
+  const [filters, setFilters] = useState<any>({ active_only: true })
   const [showReturnModal, setShowReturnModal] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
 
   const { data: assignments, isLoading, refetch } = useQuery(
-    ['assignments', activeOnly],
+    ['assignments', filters],
     async () => {
       const params = new URLSearchParams()
-      if (activeOnly) {
+      if (filters.active_only) {
         params.append('active_only', 'true')
+      }
+      if (filters.teacher_id) {
+        params.append('teacher_id', filters.teacher_id)
+      }
+      if (filters.asset_id) {
+        params.append('asset_id', filters.asset_id)
       }
       const res = await api.get(`/assignments?${params}`)
       return res.data
     }
   )
+
+  // Save filters to localStorage
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+    localStorage.setItem('assignmentFilters', JSON.stringify(newFilters))
+  }
+
+  // Load filters from localStorage on mount
+  useEffect(() => {
+    const savedFilters = localStorage.getItem('assignmentFilters')
+    if (savedFilters) {
+      try {
+        setFilters(JSON.parse(savedFilters))
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+  }, [])
+
+  const handleExport = async (exportFormat: 'pdf' | 'csv' | 'xlsx') => {
+    setExportLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('format', exportFormat)
+      if (filters.teacher_id) params.append('teacher_id', filters.teacher_id)
+      if (filters.lab_id) params.append('lab_id', filters.lab_id)
+      if (filters.category_id) params.append('category_id', filters.category_id)
+      if (filters.active_only) params.append('active_only', 'true')
+      if (filters.assignment_date_from) params.append('assignment_date_from', filters.assignment_date_from)
+      if (filters.assignment_date_to) params.append('assignment_date_to', filters.assignment_date_to)
+
+      const res = await api.get(`/reports/assignments?${params}`, {
+        responseType: 'blob',
+      })
+
+      const blob = new Blob([res.data])
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `assignment_report_${new Date().toISOString().split('T')[0]}.${exportFormat === 'xlsx' ? 'xlsx' : exportFormat}`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      alert('Assignment report downloaded successfully!')
+      setShowExportMenu(false)
+    } catch (error: any) {
+      alert(error.response?.data?.detail || 'Failed to export assignments')
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
   const handleReturn = (assignment: any) => {
     setSelectedAssignment(assignment)
@@ -39,17 +101,41 @@ export default function AssignmentsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Assignments</h1>
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={activeOnly}
-              onChange={(e) => setActiveOnly(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <span className="text-sm">Show Active Only</span>
-          </label>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+            >
+              📥 Export
+              {exportLoading && <span className="ml-2">...</span>}
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 border">
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg"
+                >
+                  📄 Export as PDF
+                </button>
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  📊 Export as CSV
+                </button>
+                <button
+                  onClick={() => handleExport('xlsx')}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg"
+                >
+                  📈 Export as Excel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      <AssignmentFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
       {/* Active Assignments */}
       {activeAssignments.length > 0 && (
@@ -98,7 +184,7 @@ export default function AssignmentsPage() {
       )}
 
       {/* Returned Assignments */}
-      {!activeOnly && returnedAssignments.length > 0 && (
+      {!filters.active_only && returnedAssignments.length > 0 && (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <h2 className="text-xl font-semibold p-6 border-b bg-gray-50">Returned Assignments</h2>
           <div className="overflow-x-auto">

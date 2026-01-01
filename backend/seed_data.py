@@ -3,7 +3,7 @@ Seed script to initialize database with default categories and sample data
 Run: python seed_data.py
 """
 from app.core.database import SessionLocal, init_db
-from app.models import Category, Lab, Vendor, Teacher, Asset
+from app.models import Category, Lab, Vendor, Teacher, Asset, ScrapPhase
 from app.schemas.asset import AssetCreate
 from app.utils.financial_year import calculate_financial_year
 from datetime import date
@@ -89,6 +89,24 @@ def seed_teachers(db):
     print("✓ Teachers seeded")
 
 
+def seed_scrap_phases(db):
+    """Create default scrap phases"""
+    phases = [
+        {"name": "Phase 1", "description": "Initial scrap phase"},
+        {"name": "Phase 2", "description": "Secondary scrap phase"},
+        {"name": "Phase 3", "description": "Final scrap phase"},
+    ]
+    
+    for phase_data in phases:
+        existing = db.query(ScrapPhase).filter(ScrapPhase.name == phase_data["name"]).first()
+        if not existing:
+            phase = ScrapPhase(**phase_data)
+            db.add(phase)
+    
+    db.commit()
+    print("✓ Scrap phases seeded")
+
+
 def seed_sample_assets(db):
     """Create sample assets"""
     # Get IDs
@@ -152,6 +170,7 @@ def main():
         seed_labs(db)
         seed_vendors(db)
         seed_teachers(db)
+        seed_scrap_phases(db)
         seed_sample_assets(db)
         
         print("\n✅ Database seeding completed successfully!")

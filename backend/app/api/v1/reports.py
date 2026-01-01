@@ -63,6 +63,41 @@ def export_asset_report(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/assignments")
+def export_assignment_report(
+    format: str = Query('pdf', regex='^(pdf|csv|xlsx)$'),
+    asset_id: Optional[str] = None,
+    teacher_id: Optional[str] = None,
+    lab_id: Optional[str] = None,
+    category_id: Optional[str] = None,
+    active_only: Optional[bool] = None,
+    assignment_date_from: Optional[date] = None,
+    assignment_date_to: Optional[date] = None,
+    db: Session = Depends(get_db)
+):
+    """Export assignment report in PDF, CSV, or Excel format with filters"""
+    service = ReportService()
+    try:
+        file_bytes, filename, content_type = service.generate_assignment_report(
+            db,
+            asset_id=asset_id,
+            teacher_id=teacher_id,
+            lab_id=lab_id,
+            category_id=category_id,
+            active_only=active_only,
+            assignment_date_from=assignment_date_from,
+            assignment_date_to=assignment_date_to,
+            format=format
+        )
+        return StreamingResponse(
+            BytesIO(file_bytes),
+            media_type=content_type,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/dashboard")
 def get_dashboard_stats(db: Session = Depends(get_db)):
     """Get dashboard statistics"""

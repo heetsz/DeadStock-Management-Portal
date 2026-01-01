@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.core.database import get_db
-from app.models import Lab, Vendor, Category, Teacher
+from app.models import Lab, Vendor, Category, Teacher, ScrapPhase
 from app.schemas.lab import LabCreate, LabUpdate, LabResponse
 from app.schemas.vendor import VendorCreate, VendorUpdate, VendorResponse
 from app.schemas.category import CategoryCreate, CategoryUpdate, CategoryResponse
 from app.schemas.teacher import TeacherCreate, TeacherUpdate, TeacherResponse
+from app.schemas.scrap_phase import ScrapPhaseCreate, ScrapPhaseUpdate, ScrapPhaseResponse
 
 router = APIRouter(prefix="/masters", tags=["Masters"])
 
@@ -224,5 +225,58 @@ def delete_teacher(teacher_id: str, db: Session = Depends(get_db)):
         )
     
     db.delete(db_teacher)
+    db.commit()
+
+
+# Scrap Phases
+@router.get("/scrap-phases", response_model=List[ScrapPhaseResponse])
+def get_scrap_phases(db: Session = Depends(get_db)):
+    """Get all scrap phases"""
+    return db.query(ScrapPhase).filter(ScrapPhase.is_active == True).all()
+
+
+@router.post("/scrap-phases", response_model=ScrapPhaseResponse, status_code=201)
+def create_scrap_phase(phase_data: ScrapPhaseCreate, db: Session = Depends(get_db)):
+    """Create a new scrap phase"""
+    db_phase = ScrapPhase(**phase_data.model_dump())
+    db.add(db_phase)
+    db.commit()
+    db.refresh(db_phase)
+    return db_phase
+
+
+@router.put("/scrap-phases/{phase_id}", response_model=ScrapPhaseResponse)
+def update_scrap_phase(phase_id: str, phase_data: ScrapPhaseUpdate, db: Session = Depends(get_db)):
+    """Update a scrap phase"""
+    db_phase = db.query(ScrapPhase).filter(ScrapPhase.phase_id == phase_id).first()
+    if not db_phase:
+        raise HTTPException(status_code=404, detail="Scrap phase not found")
+    
+    update_data = phase_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_phase, key, value)
+    
+    db.commit()
+    db.refresh(db_phase)
+    return db_phase
+
+
+@router.delete("/scrap-phases/{phase_id}", status_code=204)
+def delete_scrap_phase(phase_id: str, db: Session = Depends(get_db)):
+    """Delete a scrap phase"""
+    from app.models import Scrap
+    db_phase = db.query(ScrapPhase).filter(ScrapPhase.phase_id == phase_id).first()
+    if not db_phase:
+        raise HTTPException(status_code=404, detail="Scrap phase not found")
+    
+    # Check if phase is used by any scraps
+    scraps_count = db.query(Scrap).filter(Scrap.phase_id == phase_id).count()
+    if scraps_count > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete scrap phase. It is used by {scraps_count} scrap record(s)."
+        )
+    
+    db.delete(db_phase)
     db.commit()
 

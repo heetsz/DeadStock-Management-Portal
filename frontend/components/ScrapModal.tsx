@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useQuery } from 'react-query'
 import api from '@/lib/api'
 
 interface ScrapModalProps {
@@ -12,8 +13,13 @@ export default function ScrapModal({ asset, onClose }: ScrapModalProps) {
   const [formData, setFormData] = useState({
     scrapped_quantity: 1,
     scrap_date: new Date().toISOString().split('T')[0],
-    scrap_phase: 'Phase 1',
+    phase_id: '',
     remarks: '',
+  })
+
+  const { data: scrapPhases } = useQuery('scrap-phases', async () => {
+    const res = await api.get('/masters/scrap-phases')
+    return res.data
   })
 
   const availableQuantity = asset.available_quantity
@@ -61,15 +67,16 @@ export default function ScrapModal({ asset, onClose }: ScrapModalProps) {
             <label className="block text-sm font-medium mb-1">Scrap Phase *</label>
             <select
               required
-              value={formData.scrap_phase}
-              onChange={(e) => setFormData({ ...formData, scrap_phase: e.target.value })}
+              value={formData.phase_id}
+              onChange={(e) => setFormData({ ...formData, phase_id: e.target.value })}
               className="w-full border rounded px-3 py-2"
             >
-              <option value="Phase 1">Phase 1</option>
-              <option value="Phase 2">Phase 2</option>
-              <option value="Phase 3">Phase 3</option>
-              <option value="Phase 4">Phase 4</option>
-              <option value="Phase 5">Phase 5</option>
+              <option value="">Select Scrap Phase</option>
+              {scrapPhases?.map((phase: any) => (
+                <option key={phase.phase_id} value={phase.phase_id}>
+                  {phase.name} {phase.description ? `- ${phase.description}` : ''}
+                </option>
+              ))}
             </select>
           </div>
 

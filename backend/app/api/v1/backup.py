@@ -6,7 +6,7 @@ import json
 from io import BytesIO
 
 from app.core.database import get_db
-from app.models import Lab, Vendor, Category, Teacher, Asset, AssetAssignment, Scrap
+from app.models import Lab, Vendor, Category, Teacher, Asset, AssetAssignment, Scrap, ScrapPhase
 
 router = APIRouter(prefix="/backup", tags=["Backup & Restore"])
 
@@ -50,6 +50,13 @@ def export_backup(db: Session = Depends(get_db)):
                 "is_active": teacher.is_active,
                 "created_at": teacher.created_at.isoformat() if teacher.created_at else None
             } for teacher in db.query(Teacher).all()],
+            "scrap_phases": [{
+                "phase_id": phase.phase_id,
+                "name": phase.name,
+                "description": phase.description,
+                "is_active": phase.is_active,
+                "created_at": phase.created_at.isoformat() if phase.created_at else None
+            } for phase in db.query(ScrapPhase).all()],
             "assets": [{
                 "asset_id": asset.asset_id,
                 "description": asset.description,
@@ -83,7 +90,7 @@ def export_backup(db: Session = Depends(get_db)):
                 "asset_id": scrap.asset_id,
                 "scrapped_quantity": scrap.scrapped_quantity,
                 "scrap_date": scrap.scrap_date.isoformat() if scrap.scrap_date else None,
-                "scrap_phase": scrap.scrap_phase,
+                "phase_id": scrap.phase_id,
                 "scrap_value": str(scrap.scrap_value),
                 "remarks": scrap.remarks,
                 "created_at": scrap.created_at.isoformat() if scrap.created_at else None
@@ -122,11 +129,13 @@ async def restore_backup(file: UploadFile = File(...), db: Session = Depends(get
             raise HTTPException(status_code=400, detail="Invalid backup file format")
         
         # Clear existing data (in reverse order of dependencies)
+        # Models have cascade deletes configured, so this order works with MySQL/PostgreSQL
         db.query(Scrap).delete()
         db.query(AssetAssignment).delete()
         db.query(Asset).delete()
         db.query(Teacher).delete()
         db.query(Category).delete()
+        db.query(ScrapPhase).delete()
         db.query(Vendor).delete()
         db.query(Lab).delete()
         db.commit()
@@ -172,6 +181,16 @@ async def restore_backup(file: UploadFile = File(...), db: Session = Depends(get
             )
             db.add(teacher)
         
+        # Restore Scrap Phases
+        for phase_data in backup_data.get("scrap_phases", []):
+            phase = ScrapPhase(
+                phase_id=phase_data["phase_id"],
+                name=phase_data["name"],
+                description=phase_data.get("description"),
+                is_active=phase_data.get("is_active", True)
+            )
+            db.add(phase)
+        
         # Restore Assets
         for asset_data in backup_data.get("assets", []):
             from datetime import datetime as dt
@@ -215,12 +234,30 @@ async def restore_backup(file: UploadFile = File(...), db: Session = Depends(get
             from datetime import datetime as dt
             from decimal import Decimal
             
+            # Handle backward compatibility: if scrap_phase exists, try to find phase by name
+            phase_id = scrap_data.get("phase_id")
+            if not phase_id and "scrap_phase" in scrap_data:
+                # Try to find phase by name for backward compatibility
+                phase = db.query(ScrapPhase).filter(ScrapPhase.name == scrap_data["scrap_phase"]).first()
+                if phase:
+                    phase_id = phase.phase_id
+                else:
+                    # Create a default phase if not found
+                    default_phase = ScrapPhase(
+                        name=scrap_data["scrap_phase"],
+                        description="Migrated from backup",
+                        is_active=True
+                    )
+                    db.add(default_phase)
+                    db.flush()
+                    phase_id = default_phase.phase_id
+            
             scrap = Scrap(
                 scrap_id=scrap_data["scrap_id"],
                 asset_id=scrap_data["asset_id"],
                 scrapped_quantity=scrap_data["scrapped_quantity"],
                 scrap_date=dt.fromisoformat(scrap_data["scrap_date"]) if scrap_data.get("scrap_date") else None,
-                scrap_phase=scrap_data["scrap_phase"],
+                phase_id=phase_id,
                 scrap_value=Decimal(scrap_data["scrap_value"]),
                 remarks=scrap_data.get("remarks")
             )
@@ -234,6 +271,7 @@ async def restore_backup(file: UploadFile = File(...), db: Session = Depends(get
             "vendors": len(backup_data.get("vendors", [])),
             "categories": len(backup_data.get("categories", [])),
             "teachers": len(backup_data.get("teachers", [])),
+            "scrap_phases": len(backup_data.get("scrap_phases", [])),
             "assets": len(backup_data.get("assets", [])),
             "assignments": len(backup_data.get("assignments", [])),
             "scraps": len(backup_data.get("scraps", []))
