@@ -90,21 +90,21 @@ export default function AssignmentsPage() {
   }
 
   if (isLoading) {
-    return <div className="p-8">Loading...</div>
+    return <div className="p-4 sm:p-8">Loading...</div>
   }
 
   const activeAssignments = assignments?.filter((a: any) => !a.return_date) || []
   const returnedAssignments = assignments?.filter((a: any) => a.return_date) || []
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Assignments</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 w-full sm:w-auto"
             >
               📥 Export
               {exportLoading && <span className="ml-2">...</span>}

@@ -44,12 +44,12 @@ export default function MastersPage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold">Master Data Management</h1>
         <a
           href="/backup"
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full sm:w-auto text-center"
         >
           💾 Backup & Restore
         </a>
@@ -57,7 +57,7 @@ export default function MastersPage() {
 
       <div className="bg-white rounded-lg shadow">
         <div className="border-b">
-          <nav className="flex">
+          <nav className="flex flex-wrap">
             {(['labs', 'vendors', 'categories', 'teachers', 'scrap-phases'] as const).map((tab) => (
               <button
                 key={tab}
@@ -77,22 +77,22 @@ export default function MastersPage() {
         <div className="p-6">
           {activeTab === 'labs' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                 <h2 className="text-xl font-semibold">Labs</h2>
                 <button
                   onClick={() => {
                     setSelectedItem(null)
                     setShowLabModal(true)
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
                 >
                   + Add Lab
                 </button>
               </div>
               <div className="space-y-2">
                 {labs?.map((lab: any) => (
-                  <div key={lab.lab_id} className="flex justify-between items-center p-4 border rounded">
-                    <div>
+                  <div key={lab.lab_id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded">
+                    <div className="w-full sm:w-auto">
                       <div className="font-medium">{lab.lab_name}</div>
                       <div className="text-sm text-gray-600">Room: {lab.room_number || 'N/A'}</div>
                     </div>
@@ -135,22 +135,22 @@ export default function MastersPage() {
 
           {activeTab === 'vendors' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                 <h2 className="text-xl font-semibold">Vendors</h2>
                 <button
                   onClick={() => {
                     setSelectedItem(null)
                     setShowVendorModal(true)
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
                 >
                   + Add Vendor
                 </button>
               </div>
               <div className="space-y-2">
                 {vendors?.map((vendor: any) => (
-                  <div key={vendor.vendor_id} className="flex justify-between items-center p-4 border rounded">
-                    <div>
+                  <div key={vendor.vendor_id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded">
+                    <div className="w-full sm:w-auto">
                       <div className="font-medium">{vendor.vendor_name}</div>
                       <div className="text-sm text-gray-600">Bill: {vendor.bill_number || 'N/A'}</div>
                     </div>
@@ -188,22 +188,22 @@ export default function MastersPage() {
 
           {activeTab === 'categories' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                 <h2 className="text-xl font-semibold">Categories</h2>
                 <button
                   onClick={() => {
                     setSelectedItem(null)
                     setShowCategoryModal(true)
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
                 >
                   + Add Category
                 </button>
               </div>
               <div className="space-y-2">
                 {categories?.map((cat: any) => (
-                  <div key={cat.category_id} className="flex justify-between items-center p-4 border rounded">
-                    <div>
+                  <div key={cat.category_id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded">
+                    <div className="w-full sm:w-auto">
                       <div className="font-medium">{cat.name}</div>
                       {cat.is_special && (
                         <div className="text-xs text-orange-600">Special Hardware</div>
@@ -248,22 +248,22 @@ export default function MastersPage() {
 
           {activeTab === 'teachers' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                 <h2 className="text-xl font-semibold">Teachers</h2>
                 <button
                   onClick={() => {
                     setSelectedItem(null)
                     setShowTeacherModal(true)
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
                 >
                   + Add Teacher
                 </button>
               </div>
               <div className="space-y-2">
                 {teachers?.map((teacher: any) => (
-                  <div key={teacher.teacher_id} className="flex justify-between items-center p-4 border rounded">
-                    <div>
+                  <div key={teacher.teacher_id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded">
+                    <div className="w-full sm:w-auto">
                       <div className="font-medium">{teacher.name}</div>
                       <div className="text-sm text-gray-600">
                         {teacher.department} - {teacher.designation}
@@ -308,22 +308,22 @@ export default function MastersPage() {
 
           {activeTab === 'scrap-phases' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                 <h2 className="text-xl font-semibold">Scrap Phases</h2>
                 <button
                   onClick={() => {
                     setSelectedItem(null)
                     setShowScrapPhaseModal(true)
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
                 >
                   + Add Scrap Phase
                 </button>
               </div>
               <div className="space-y-2">
                 {scrapPhases?.map((phase: any) => (
-                  <div key={phase.phase_id} className="flex justify-between items-center p-4 border rounded">
-                    <div>
+                  <div key={phase.phase_id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border rounded">
+                    <div className="w-full sm:w-auto">
                       <div className="font-medium">{phase.name}</div>
                       {phase.description && (
                         <div className="text-sm text-gray-600">{phase.description}</div>

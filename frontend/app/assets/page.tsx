@@ -91,17 +91,17 @@ export default function AssetsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-3xl font-bold">Assets</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <div className="relative">
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 setShowExportMenu(!showExportMenu)
               }}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full sm:w-auto"
             >
               Export ▼
             </button>
@@ -145,7 +145,7 @@ export default function AssetsPage() {
           </div>
           <button
             onClick={() => setShowAssetModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full sm:w-auto"
           >
             + Add Asset
           </button>
