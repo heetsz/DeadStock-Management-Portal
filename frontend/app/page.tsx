@@ -102,15 +102,15 @@ export default function Home() {
           }
         >
           <div className="flex items-center gap-3 px-4 py-4">
-            <Link href="/" className="flex items-center gap-3">
+            <button onClick={() => setActiveTab("dashboard")} className="flex items-center gap-3 hover:opacity-75 transition-opacity">
               <div className="relative h-10 w-10 shrink-0">
                 <Image src="/image.png" alt="Company Logo" fill priority sizes="40px" className="rounded-lg" />
               </div>
-              <div className={(collapsed ? "hidden " : "") + "leading-tight"}>
+              <div className={(collapsed ? "hidden " : "") + "leading-tight text-left"}>
                 <div className="text-base font-semibold text-gray-900">SPIT CE</div>
                 <div className="text-xs text-gray-500">Deadstock Portal</div>
               </div>
-            </Link>
+            </button>
             <button
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               onClick={() => setCollapsed((c) => !c)}
@@ -143,10 +143,11 @@ export default function Home() {
           </nav>
 
           {/* Footer */}
-          <div className={(collapsed ? "hidden " : "") + "px-3 py-4 mt-auto"}>
+          <div className="px-3 py-4 mt-auto">
             <Button
               variant="destructive"
-              className="w-full justify-start gap-2"
+              className={collapsed ? "w-full h-10 p-0" : "w-full justify-start gap-2"}
+              title={collapsed ? "Sign out" : undefined}
               onClick={async () => {
                 await supabase.auth.signOut()
                 toast.success("Signed out")
@@ -154,7 +155,7 @@ export default function Home() {
               }}
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              <span className={collapsed ? "hidden" : ""}>Sign out</span>
             </Button>
           </div>
         </aside>
