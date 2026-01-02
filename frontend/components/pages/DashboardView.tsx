@@ -67,10 +67,10 @@ export default function DashboardView() {
   const COLORS = useMemo(() => ({ assigned: "#3b82f6", scrapped: "#ef4444", available: "#10b981" }), [])
 
   return (
-    <div className="space-y-6 p-4 sm:p-0">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-                          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{displayName ? `Hello, ${displayName.split(" ")[0] } 👋 ` : 'Dashboard'}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{displayName ? `Hello, ${displayName.split(" ")[0]} 👋 ` : 'Dashboard'}</h1>
           <p className="text-gray-600">Overview of deadstock & asset metrics</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">

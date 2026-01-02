@@ -49,7 +49,7 @@ export default function AssetModal({ onClose }: AssetModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
         <h2 className="text-2xl font-bold mb-6">Add New Asset</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">

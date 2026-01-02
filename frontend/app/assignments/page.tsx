@@ -74,7 +74,7 @@ export default function AssignmentsPage() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      
+
       alert('Assignment report downloaded successfully!')
       setShowExportMenu(false)
     } catch (error: any) {
@@ -98,9 +98,9 @@ export default function AssignmentsPage() {
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Assignments</h1>
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-4 flex-wrap w-full sm:w-auto">
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}

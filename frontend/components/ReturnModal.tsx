@@ -27,7 +27,7 @@ export default function ReturnModal({ assignment, onClose }: ReturnModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-md w-full">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full max-h-[90vh] overflow-y-auto m-4">
         <h2 className="text-2xl font-bold mb-6">Return Asset</h2>
 
         <div className="mb-4 p-4 bg-gray-50 rounded">

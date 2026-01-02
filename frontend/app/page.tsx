@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import {
@@ -14,12 +13,24 @@ import {
   HardDrive,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  X,
+  LogOut
 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
 import { toast } from "sonner"
+
+// Import existing route pages to render inside as inner views
+import DashboardView from "@/components/pages/DashboardView"
+import AssetsPage from "@/app/assets/page"
+import AssignmentsPage from "@/app/assignments/page"
+import TeachersPage from "@/app/teachers/page"
+import MastersPage from "@/app/masters/page"
+import ReportsPage from "@/app/reports/page"
+import ScrapPage from "@/app/scrap/page"
+import BackupPage from "@/app/backup/page"
 
 type TabKey =
   | "dashboard"
@@ -48,20 +59,11 @@ const navItems: NavItem[] = [
   { label: "Backup", key: "backup", icon: HardDrive },
 ]
 
-// Import existing route pages to render inside as inner views
-import DashboardView from "@/components/pages/DashboardView"
-import AssetsPage from "@/app/assets/page"
-import AssignmentsPage from "@/app/assignments/page"
-import TeachersPage from "@/app/teachers/page"
-import MastersPage from "@/app/masters/page"
-import ReportsPage from "@/app/reports/page"
-import ScrapPage from "@/app/scrap/page"
-import BackupPage from "@/app/backup/page"
-
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard")
   const [isLoading, setIsLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -79,6 +81,12 @@ export default function Home() {
     }
   }, [router])
 
+  // Close mobile menu when tab changes
+  const handleTabChange = (key: TabKey) => {
+    setActiveTab(key)
+    setMobileMenuOpen(false)
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -92,88 +100,138 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <aside
-          className={
-            "group sticky top-0 h-screen bg-white/90 backdrop-blur border-r border-gray-200 shadow-sm transition-all duration-300 flex flex-col " +
-            (collapsed ? "w-20" : "w-72")
-          }
-        >
-          <div className="flex items-center gap-3 px-4 py-4">
-            <button onClick={() => setActiveTab("dashboard")} className="flex items-center gap-3 hover:opacity-75 transition-opacity">
-              <div className="relative h-10 w-10 shrink-0">
-                <Image src="/image.png" alt="Company Logo" fill priority sizes="40px" className="rounded-lg" />
-              </div>
-              <div className={(collapsed ? "hidden " : "") + "leading-tight text-left"}>
-                <div className="text-base font-semibold text-gray-900">SPIT CE</div>
-                <div className="text-xs text-gray-500">Deadstock Portal</div>
-              </div>
-            </button>
-            <button
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={() => setCollapsed((c) => !c)}
-              className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            >
-              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </button>
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col md:flex-row">
+
+      {/* Mobile Header */}
+      <div className="md:hidden bg-white/90 backdrop-blur border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center gap-3">
+          <div className="relative h-8 w-8 shrink-0">
+            <Image src="/image.png" alt="Logo" fill sizes="32px" className="rounded-lg object-cover" />
           </div>
+          <span className="font-semibold text-gray-900">Deadstock Portal</span>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
+          <Menu className="h-6 w-6 text-gray-700" />
+        </Button>
+      </div>
 
-          <nav className="px-2 py-2">
-            {navItems.map(({ label, key, icon: Icon }) => {
-              const active = activeTab === key
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={
-                    "w-full text-left flex items-center gap-3 rounded-md px-3 py-2 mb-1 transition-colors " +
-                    (active
-                      ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-                      : "text-gray-700 hover:bg-gray-100")
-                  }
-                  aria-current={active ? "page" : undefined}
-                >
-                  <Icon className={"h-5 w-5 " + (active ? "text-indigo-700" : "text-gray-600")} />
-                  <span className={(collapsed ? "hidden " : "") + "text-sm font-medium"}>{label}</span>
-                </button>
-              )
-            })}
-          </nav>
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden animate-in fade-in"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-          {/* Footer */}
-          <div className="px-3 py-4 mt-auto">
-            <Button
-              variant="destructive"
-              className={collapsed ? "w-full h-10 p-0" : "w-full justify-start gap-2"}
-              title={collapsed ? "Sign out" : undefined}
-              onClick={async () => {
-                await supabase.auth.signOut()
-                toast.success("Signed out")
-                router.replace('/login')
-              }}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className={collapsed ? "hidden" : ""}>Sign out</span>
+      {/* Sidebar - Desktop Sticky / Mobile Fixed */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 bg-white/95 backdrop-blur border-r border-gray-200 shadow-xl
+          transition-transform duration-300 ease-in-out
+          flex flex-col
+          md:sticky md:top-0 md:h-screen md:shadow-sm md:translate-x-0
+          ${collapsed ? "md:w-20" : "md:w-72"}
+          w-72 h-full
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center gap-3 px-4 py-4 md:py-6 shrink-0">
+          {/* Close button for mobile */}
+          <div className="md:hidden w-full flex justify-between items-center mb-2">
+            <div className="flex items-center gap-3">
+              <div className="relative h-8 w-8 shrink-0">
+                <Image src="/image.png" alt="Logo" fill sizes="32px" className="rounded-lg" />
+              </div>
+              <span className="font-bold text-gray-900">Menu</span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+              <X className="h-5 w-5" />
             </Button>
           </div>
-        </aside>
 
-        {/* Main content */}
-        <section className="flex-1">
-          <div className="px-6 py-6">
-            {activeTab === "dashboard" && <DashboardView />}
-            {activeTab === "assets" && <AssetsPage />}
-            {activeTab === "assignments" && <AssignmentsPage />}
-            {activeTab === "teachers" && <TeachersPage />}
-            {activeTab === "masters" && <MastersPage />}
-            {activeTab === "reports" && <ReportsPage />}
-            {activeTab === "scrap" && <ScrapPage />}
-            {activeTab === "backup" && <BackupPage />}
-          </div>
-        </section>
-      </div>
+          {/* Desktop Logo Area */}
+          <button
+            onClick={() => handleTabChange("dashboard")}
+            className={`hidden md:flex items-center gap-3 hover:opacity-75 transition-opacity ${collapsed ? "justify-center w-full" : ""}`}
+          >
+            <div className="relative h-10 w-10 shrink-0">
+              <Image src="/image.png" alt="Company Logo" fill priority sizes="40px" className="rounded-lg" />
+            </div>
+            <div className={(collapsed ? "hidden " : "") + "leading-tight text-left"}>
+              <div className="text-base font-semibold text-gray-900">SPIT CE</div>
+              <div className="text-xs text-gray-500">Deadstock Portal</div>
+            </div>
+          </button>
+
+          {/* Desktop Collapse Toggle */}
+          <button
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => setCollapsed((c) => !c)}
+            className={`
+              hidden md:inline-flex ml-auto h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none
+              ${collapsed ? "absolute -right-4 top-6 shadow-md bg-white z-50" : ""}
+            `}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-2 py-2 overflow-y-auto">
+          {navItems.map(({ label, key, icon: Icon }) => {
+            const active = activeTab === key
+            return (
+              <button
+                key={key}
+                onClick={() => handleTabChange(key)}
+                className={
+                  "w-full text-left flex items-center gap-3 rounded-md px-3 py-2.5 mb-1 transition-colors " +
+                  (active
+                    ? "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                    : "text-gray-700 hover:bg-gray-100") +
+                  (collapsed ? " md:justify-center md:px-2" : "")
+                }
+                title={collapsed ? label : undefined}
+              >
+                <Icon className={"h-5 w-5 shrink-0 " + (active ? "text-indigo-700" : "text-gray-600")} />
+                <span className={`text-sm font-medium ${collapsed ? "md:hidden" : ""}`}>{label}</span>
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="px-3 py-4 mt-auto border-t md:border-t-0 p-4">
+          <Button
+            variant="destructive"
+            className={`w-full ${collapsed ? "md:h-10 md:p-0" : "justify-start gap-2"}`}
+            title="Sign out"
+            onClick={async () => {
+              await supabase.auth.signOut()
+              toast.success("Signed out")
+              router.replace('/login')
+            }}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className={`${collapsed ? "md:hidden" : ""}`}>Sign out</span>
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <section className="flex-1 w-full min-w-0">
+        <div className="p-4 md:p-6 lg:p-8">
+          {activeTab === "dashboard" && <DashboardView />}
+          {activeTab === "assets" && <AssetsPage />}
+          {activeTab === "assignments" && <AssignmentsPage />}
+          {activeTab === "teachers" && <TeachersPage />}
+          {activeTab === "masters" && <MastersPage />}
+          {activeTab === "reports" && <ReportsPage />}
+          {activeTab === "scrap" && <ScrapPage />}
+          {activeTab === "backup" && <BackupPage />}
+        </div>
+      </section>
     </main>
   )
 }
