@@ -2,7 +2,7 @@
 
 A full-stack web application for managing and tracking deadstock inventory for the Computer Engineering Department at SPIT. Built with FastAPI backend, Next.js frontend, MySQL database, and Supabase authentication.
 
-**Live Demo:** [Click Here !!](https://deadstock-management-portal.onrender. com)
+**Live Demo:** [Click Here !!](https://deadstock-management-portal.onrender.com)
 
 ---
 
