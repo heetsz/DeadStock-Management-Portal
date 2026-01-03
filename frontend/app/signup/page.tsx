@@ -8,17 +8,31 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Lock, Mail, User, Eye, EyeOff } from 'lucide-react'
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react'
+
+function deriveFullName(email: string) {
+  const localPart = email.split('@')[0] // heet.shah123
+  const parts = localPart.split(/[._]/) // split by . or _
+  
+  if (parts.length < 2) return ''
+
+  const firstName = parts[0]
+  const lastName = parts[1].replace(/\d+/g, '') // remove numbers
+
+  const capitalize = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+
+  return `${capitalize(firstName)} ${capitalize(lastName)}`
+}
 
 function SignupFormInner() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  // If already authenticated, don't allow visiting signup
+  // Redirect if already logged in
   useEffect(() => {
     let mounted = true
     supabase.auth.getSession().then(({ data }) => {
@@ -33,26 +47,50 @@ function SignupFormInner() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+
     try {
-      const trimmed = email.trim()
-      const isSpitEmail = /@spit\.ac\.in$/i.test(trimmed)
+      const trimmedEmail = email.trim()
+      const isSpitEmail = /@spit\.ac\.in$/i.test(trimmedEmail)
+
       if (!isSpitEmail) {
-        toast.error('Use SPIT email only', { description: 'Please sign up with your @spit.ac.in email.' })
+        toast.error('Use SPIT email only', {
+          description: 'Please sign up with your @spit.ac.in email.',
+        })
         setLoading(false)
         return
       }
+
+      const fullName = deriveFullName(trimmedEmail)
+
+      if (!fullName) {
+        toast.error('Invalid email format', {
+          description: 'Email should be like first.last@spit.ac.in',
+        })
+        setLoading(false)
+        return
+      }
+
       const { error } = await supabase.auth.signUp({
-        email,
+        email: trimmedEmail,
         password,
         options: {
-          data: { full_name: fullName },
+          data: {
+            full_name: fullName,
+          },
         },
       })
+
       if (error) throw error
-      toast.success('Account created. Please check your email to confirm.')
+
+      toast.success('Account created!', {
+        description: 'Please check your email to confirm your account.',
+      })
+
       router.replace('/login')
     } catch (err: any) {
-      toast.error('Sign up failed', { description: err?.message ?? 'Please try again.' })
+      toast.error('Sign up failed', {
+        description: err?.message ?? 'Please try again.',
+      })
     } finally {
       setLoading(false)
     }
@@ -61,141 +99,94 @@ function SignupFormInner() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="flex min-h-screen">
-        {/* Hero Section - Left Side */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8 relative overflow-hidden order-1 lg:order-1 animate-slideInLeft">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 opacity-95" />
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 -left-40 w-80 h-80 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-            <div className="absolute -bottom-8 right-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000" />
-          </div>
+        
+        {/* Left Hero Section */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 opacity-95" />
           <div className="relative z-10 text-center text-white max-w-md">
             <div className="flex justify-center mb-6">
               <div className="relative w-24 h-24">
-                <Image src="/image.png" alt="SPIT CE Logo" fill sizes="96px" className="object-contain drop-shadow-lg" />
+                <Image src="/image.png" alt="SPIT CE Logo" fill className="object-contain" />
               </div>
             </div>
             <h1 className="text-4xl font-bold mb-3">Deadstock Management Portal</h1>
-            <p className="text-indigo-100 text-lg mb-2">SPIT CE Department</p>
-            <div className="h-1 w-16 bg-indigo-300 mx-auto rounded-full mb-6" />
-            <p className="text-indigo-100 leading-relaxed">
-              Create an account to manage and track your deadstock assets efficiently. Sign up with your SPIT account.
-            </p>
+            <p className="text-indigo-100">SPIT CE Department</p>
           </div>
         </div>
 
-        {/* Form Section - Right Side */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-8 order-2 lg:order-2 animate-slideInRight">
+        {/* Right Form Section */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
           <div className="w-full max-w-md">
-            {/* Mobile Header */}
-            <div className="lg:hidden text-center mb-8">
-              <div className="flex justify-center mb-4">
-                <div className="relative w-16 h-16">
-                  <Image src="/image.png" alt="SPIT CE Logo" fill sizes="64px" className="object-contain" />
-                </div>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Deadstock Portal</h1>
-              <p className="text-sm text-gray-600">SPIT CE Department</p>
-            </div>
 
-            <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur">
-              <CardHeader className="space-y-2 pb-4">
-                <CardTitle className="text-4xl font-extrabold text-gray-900">Signup</CardTitle>
-                <p className="text-sm text-gray-600">Sign up with your SPIT email to get started</p>
+            <Card className="shadow-2xl border-0">
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold">Signup</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Name will be auto-generated from your email
+                </p>
               </CardHeader>
+
               <CardContent>
                 <form onSubmit={onSubmit} className="space-y-5">
-                  {/* Full Name Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Full Name</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition-colors bg-gray-50 text-gray-900 placeholder-gray-400"
-                        placeholder="Full Name"
-                      />
-                    </div>
-                  </div>
 
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Email Address</label>
-                    <div className="relative">
+                  {/* Email */}
+                  <div>
+                    <label className="text-sm font-semibold">Email</label>
+                    <div className="relative mt-1">
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                       <input
                         type="email"
+                        required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition-colors bg-gray-50 text-gray-900 placeholder-gray-400"
-                        placeholder="name@spit.ac.in"
+                        placeholder="heet.shah@spit.ac.in"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 outline-none"
                       />
                     </div>
                   </div>
 
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Password</label>
-                    <div className="relative">
+                  {/* Password */}
+                  <div>
+                    <label className="text-sm font-semibold">Password</label>
+                    <div className="relative mt-1">
                       <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none transition-colors bg-gray-50 text-gray-900 placeholder-gray-400"
-                        placeholder="••••••••"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 outline-none"
                       />
                       <button
                         type="button"
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
+                        {showPassword ? <EyeOff /> : <Eye />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Info Banner */}
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                    <p className="text-xs text-indigo-700 font-medium">
-                      ✓ Use your @spit.ac.in email address to sign up
-                    </p>
-                  </div>
-
-                  {/* Sign Up Button */}
-                  <Button 
-                    type="submit" 
-                    className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                  <Button
+                    type="submit"
                     disabled={loading}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700"
                   >
                     {loading ? 'Creating account...' : 'Sign Up'}
                   </Button>
                 </form>
 
-                {/* Sign In Link */}
-                <div className="mt-6 pt-4 border-t border-gray-200 text-center">
-                  <p className="text-sm text-gray-600">
-                    Already have an account?{' '}
-                    <Link href="/login" className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">
-                      Sign in
-                    </Link>
-                  </p>
-                </div>
+                <p className="text-sm text-center mt-6">
+                  Already have an account?{' '}
+                  <Link href="/login" className="text-indigo-600 font-semibold">
+                    Sign in
+                  </Link>
+                </p>
               </CardContent>
             </Card>
 
-            {/* Footer */}
-            <p className="text-center text-xs text-gray-500 mt-6">
-              © 2026 SPIT Computer Engineering. All rights reserved.
+            <p className="text-xs text-center text-gray-500 mt-6">
+              © 2026 SPIT Computer Engineering
             </p>
           </div>
         </div>
@@ -206,7 +197,7 @@ function SignupFormInner() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"><div className="text-gray-600">Loading...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <SignupFormInner />
     </Suspense>
   )
