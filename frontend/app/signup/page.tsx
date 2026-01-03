@@ -139,7 +139,7 @@ function SignupFormInner() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="heet.shah@spit.ac.in"
+                        placeholder="name@spit.ac.in"
                         className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 outline-none"
                       />
                     </div>
@@ -154,6 +154,7 @@ function SignupFormInner() {
                         type={showPassword ? 'text' : 'password'}
                         required
                         value={password}
+                        placeholder="••••••••"
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full pl-10 pr-10 py-2.5 rounded-lg border-2 border-gray-200 focus:border-indigo-500 outline-none"
                       />
