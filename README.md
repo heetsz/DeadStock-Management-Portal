@@ -1,9 +1,10 @@
 # DeadStock Management Portal
 
-A full-stack web application for managing and tracking dead stock inventory. Built with modern technologies for both frontend and backend.
+A full-stack web application for managing and tracking deadstock inventory for the Computer Engineering Department at SPIT. Built with FastAPI backend, Next.js frontend, MySQL database, and Supabase authentication.
 
-**Live Demo:**  
-- [Render](https://deadstock-management-portal.onrender.com) 
+**Live Demo:** [Click Here !!](https://deadstock-management-portal.onrender. com)
+
+---
 
 ## 📋 Table of Contents
 
@@ -16,33 +17,64 @@ A full-stack web application for managing and tracking dead stock inventory. Bui
   - [Frontend Setup](#frontend-setup)
 - [Running the Application](#running-the-application)
 - [Environment Variables](#environment-variables)
-- [Project Structure Details](#project-structure-details)
+- [Authentication](#authentication)
+- [API Documentation](#api-documentation)
+- [Database Schema](#database-schema)
 - [Contributing](#contributing)
 - [License](#license)
 
+---
+
 ## ✨ Features
 
-- **Inventory Management** - Track and manage dead stock items
-- **Real-time Updates** - Live inventory status tracking
-- **User-friendly Interface** - Intuitive UI built with modern web technologies
-- **Responsive Design** - Works seamlessly on desktop and mobile devices
-- **Data Persistence** - Reliable backend with database integration
+### Core Functionality
+- 🔐 **Secure Authentication** - Supabase-powered authentication with SPIT email validation (@spit.ac.in)
+- 📦 **Asset Management** - Complete CRUD operations for managing deadstock assets
+- 👥 **Assignment Tracking** - Track asset assignments to teachers with location and date management
+- 🗑️ **Scrap Management** - Multi-phase scrap workflow (Identified → Committee Review → Principal Approval → Final Action)
+- 📊 **Dashboard Analytics** - Real-time statistics and insights on inventory status
+- 📄 **Comprehensive Reports** - Generate detailed reports with filters and export capabilities
+- 🏷️ **Master Data Management** - Manage labs, vendors, categories, teachers, and scrap phases
+- 💾 **Backup & Restore** - Database backup and restoration functionality
+- 🔍 **Advanced Filtering** - Filter assets by category, lab, vendor, status, and financial year
+
+### User Experience
+- 📱 **Fully Responsive** - Mobile-first design with optimized layouts for all devices
+- 🎨 **Modern UI** - Clean, intuitive interface with Tailwind CSS and shadcn/ui components
+- 🌙 **Enhanced Accessibility** - Password visibility toggle, form validation, and user-friendly error messages
+- ⚡ **Real-time Updates** - Live inventory status tracking
+- 🎯 **Collapsible Sidebar** - Desktop navigation with collapse/expand functionality
+- 📲 **Mobile Menu** - Touch-friendly overlay menu for mobile devices
+
+---
 
 ## 🛠 Tech Stack
 
 ### Backend
 - **Framework:** FastAPI (Python 3.11.9)
-- **Runtime:** Python 3.11.9
-- **Database:** MySQL
-- **ORM:** SQLAlchemy
-- **Dependencies:** See `backend/requirements.txt`
+- **Database:** MySQL with PyMySQL connector
+- **ORM:** SQLAlchemy 2.x
+- **Validation:** Pydantic V2
+- **CORS:** FastAPI middleware for cross-origin requests
+- **Authentication:** Token-based authentication ready (JWT support)
 
 ### Frontend
-- **Framework:** Next.js
+- **Framework:** Next.js 14+ (App Router)
 - **Language:** TypeScript
+- **Authentication:** Supabase Auth with email validation
 - **Styling:** Tailwind CSS
-- **UI Components:** Configured with `components.json`
+- **UI Components:** shadcn/ui
+- **Icons:** Lucide React
+- **HTTP Client:** Axios
+- **Notifications:** Sonner (toast notifications)
 - **Linting:** ESLint
+
+### DevOps & Deployment
+- **Hosting:** Render (Backend & Frontend)
+- **Database:** MySQL (Cloud or Local)
+- **Version Control:** Git & GitHub
+
+---
 
 ## 📁 Project Structure
 
@@ -50,103 +82,181 @@ A full-stack web application for managing and tracking dead stock inventory. Bui
 DeadStock-Management-Portal/
 ├── backend/
 │   ├── app/
-│   │   ├── api/           # API endpoints
-│   │   ├── core/          # Core configuration
-│   │   ├── models/        # Database models
-│   │   ├── schemas/       # Pydantic schemas
-│   │   ├── services/      # Business logic
-│   │   ├── utils/         # Utility functions
-│   │   ├── main.py        # Application entry point
-│   │   └── __init__.py
-│   ├── .env               # Environment variables
+│   │   ├── api/
+│   │   │   ├── deps.py              # Dependency injection
+│   │   │   └── v1/
+│   │   │       ├── __init__.py      # API router aggregation
+│   │   │       ├── assets.py        # Asset CRUD endpoints
+│   │   │       ├── assignments.py   # Assignment management
+│   │   │       ├── backup.py        # Backup & restore
+│   │   │       ├── filters.py       # Filter endpoints
+│   │   │       ├── masters.py       # Master data management
+│   │   │       ├── reports.py       # Reporting endpoints
+│   │   │       └── scrap.py         # Scrap management
+│   │   ├── core/
+│   │   │   ├── config.py            # Environment configuration
+│   │   │   └── database.py          # Database connection & session
+│   │   ├── models/                  # SQLAlchemy ORM models
+│   │   │   ├── __init__.py
+│   │   │   ├── asset.py
+│   │   │   ├── assignment.py
+│   │   │   ├── category.py
+│   │   │   ├── lab.py
+│   │   │   ├── scrap.py
+│   │   │   ├── scrap_phase.py
+│   │   │   ├── teacher.py
+│   │   │   └── vendor.py
+│   │   ├── schemas/                 # Pydantic validation schemas
+│   │   ├── services/                # Business logic layer
+│   │   ├── utils/
+│   │   │   └── financial_year.py    # FY calculation utilities
+│   │   └── main.py                  # FastAPI application entry
+│   ├── . env                         # Environment variables
 │   ├── .gitignore
-│   ├── requirements.txt   # Python dependencies
-│   ├── runtime.txt        # Python version
-│   ├── seed_data.py       # Database seeding script
-│   ├── start.bat          # Windows startup script
-│   └── start.sh           # Unix startup script
+│   ├── requirements.txt             # Python dependencies
+│   ├── runtime.txt                  # Python version (3.11.9)
+│   ├── seed_data.py                 # Database seeding script
+│   ├── start.bat                    # Windows startup script
+│   └── start. sh                     # Unix startup script
 │
 ├── frontend/
-│   ├── app/               # Next.js app directory
-│   ├── components/        # React components
-│   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utility libraries
-│   ├── public/            # Static assets
-│   ├── .env               # Environment variables
-│   ├── .eslintrc.json     # ESLint configuration
-│   ├── next.config.js     # Next.js configuration
-│   ├── tailwind.config.js # Tailwind CSS configuration
-│   ├── tsconfig.json      # TypeScript configuration
-│   ├── package.json       # Node dependencies
-│   ├── start.bat          # Windows startup script
-│   └── start.sh           # Unix startup script
+│   ├── app/
+│   │   ├── assignments/             # Assignment management page
+│   │   ├── assets/                  # Asset management page
+│   │   ├── backup/                  # Backup page
+│   │   ├── login/
+│   │   │   └── page.tsx             # Login page with auth
+│   │   ├── masters/                 # Master data page
+│   │   ├── reports/                 # Reports page
+│   │   ├── scrap/                   # Scrap management page
+│   │   ├── signup/
+│   │   │   └── page.tsx             # Signup page with validation
+│   │   ├── teachers/                # Teacher management page
+│   │   ├── layout.tsx               # Root layout
+│   │   ├── page.tsx                 # Main dashboard with sidebar
+│   │   ├── providers. tsx            # App providers
+│   │   └── globals.css              # Global styles
+│   ├── components/
+│   │   ├── pages/
+│   │   │   └── DashboardView.tsx    # Dashboard component
+│   │   └── ui/                      # shadcn/ui components
+│   ├── hooks/                       # Custom React hooks
+│   ├── lib/
+│   │   ├── api. ts                   # Axios API client
+│   │   ├── supabase/
+│   │   │   └── client.ts            # Supabase client setup
+│   │   └── utils.ts                 # Utility functions
+│   ├── public/
+│   │   └── image.png                # SPIT CE logo
+│   ├── . env. local                   # Local environment variables
+│   ├── . env.example                 # Environment template
+│   ├── . eslintrc.json               # ESLint configuration
+│   ├── middleware.ts                # Next.js middleware
+│   ├── next.config.js               # Next.js configuration
+│   ├── tailwind.config.js           # Tailwind CSS configuration
+│   ├── tsconfig.json                # TypeScript configuration
+│   ├── package.json                 # Node dependencies
+│   ├── start.bat                    # Windows startup script
+│   └── start.sh                     # Unix startup script
 │
-└── README.md              # This file
+└── README.md
 ```
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Backend:** Python 3.11.9
-- **Database:** MySQL 8.0+ or MariaDB 10.3+ (installed and running)
-- **Frontend:** Node.js 16+ and npm/yarn
+- **Python:** 3.11.9 or higher
+- **Node.js:** 16+ (with npm or yarn)
+- **MySQL:** 8.0+ or MariaDB 10.3+ (installed and running)
 - **Git:** For version control
+- **Supabase Account:** For authentication ([supabase.com](https://supabase.com))
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
+1. **Clone the repository:**
    ```bash
-   cd backend
+   git clone https://github.com/heetsz/DeadStock-Management-Portal.git
+   cd DeadStock-Management-Portal/backend
    ```
 
-2. Install Python dependencies:
+2. **Create a virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Set up MySQL database:
+4. **Set up MySQL database:**
    ```bash
-   # Using MySQL command line
+   # Login to MySQL
    mysql -u root -p
+
+   # Create database
    CREATE DATABASE deadstock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   # Or using command:
-   # mysql -u root -p -e "CREATE DATABASE deadstock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   EXIT;
    ```
 
-4. Create a `.env` file in the backend directory with your configuration:
-   ```
-   DATABASE_URL=mysql+pymysql://username:password@localhost:3306/deadstock
-   SECRET_KEY=your-secret-key-change-in-production
+5. **Configure environment variables:**
+   Create a `.env` file in the `backend/` directory:
+   ```env
+   DATABASE_URL=mysql+pymysql://username:password@localhost: 3306/deadstock
+   SECRET_KEY=your-secret-key-change-in-production-use-openssl-rand-hex-32
    ALGORITHM=HS256
    ACCESS_TOKEN_EXPIRE_MINUTES=30
    FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001
    ```
-   Replace `username`, `password`, and `localhost:3306` with your MySQL credentials.
+   
+   **Important:** Replace `username` and `password` with your MySQL credentials. 
 
-5. Seed the database (optional):
+6. **Initialize the database:**
+   The database tables will be created automatically when you start the application.  To seed with sample data:
    ```bash
    python seed_data.py
    ```
 
 ### Frontend Setup
 
-1. Navigate to the frontend directory:
+1. **Navigate to frontend directory:**
    ```bash
-   cd frontend
+   cd ../frontend
    ```
 
-2. Install Node dependencies:
+2. **Install dependencies:**
    ```bash
    npm install
    # or
    yarn install
    ```
 
-3. Create a `.env` file with your API configuration:
+3. **Set up Supabase:**
+   - Create a project at [supabase.com](https://supabase.com)
+   - Go to Project Settings → API
+   - Copy the Project URL and anon/public key
+
+4. **Configure environment variables:**
+   Create a `.env. local` file in the `frontend/` directory:
+   ```env
+   # API Configuration
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   ```
+
+5. **Configure Supabase Email Validation:**
+   - Go to Authentication → Providers → Email
+   - Enable email provider
+   - Optionally configure email templates for confirmation
+
+---
 
 ## ▶️ Running the Application
 
@@ -155,6 +265,7 @@ DeadStock-Management-Portal/
 **Linux/macOS:**
 ```bash
 cd backend
+chmod +x start.sh
 ./start.sh
 ```
 
@@ -164,13 +275,22 @@ cd backend
 start.bat
 ```
 
+**Manual start:**
+```bash
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
 The backend API will be available at `http://localhost:8000`
+- API Documentation: `http://localhost:8000/docs`
+- Alternative docs: `http://localhost:8000/redoc`
 
 ### Frontend
 
 **Linux/macOS:**
 ```bash
 cd frontend
+chmod +x start.sh
 ./start.sh
 ```
 
@@ -180,80 +300,185 @@ cd frontend
 start.bat
 ```
 
+**Manual start:**
+```bash
+cd frontend
+npm run dev
+```
+
 The frontend application will be available at `http://localhost:3000`
 
-### Development Commands
-
-**Backend:**
-```bash
-# Run with auto-reload
-uvicorn app.main:app --reload
-
-# Run on specific port
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-**Frontend:**
-```bash
-# Development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
-```
+---
 
 ## 🔐 Environment Variables
 
-### Backend (`.env`)
-```
-# MySQL connection string
+### Backend `.env`
+```env
+# MySQL Database Connection
 # Format: mysql+pymysql://username:password@host:port/database_name
 DATABASE_URL=mysql+pymysql://root:password@localhost:3306/deadstock
-SECRET_KEY=your_secret_key
+
+# JWT Authentication
+SECRET_KEY=your-secret-key-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001
+
+# CORS Origins (comma-separated)
+FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001,https://your-production-url.com
 ```
 
-### Frontend (`.env.local`)
-Create a `.env.local` file in the `frontend` directory:
-```
+### Frontend `.env.local`
+```env
+# Backend API Base URL
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project. supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-**Important Notes:**
-- For local development: Create `frontend/.env.local` with the above content
-- For production (Render): Set `NEXT_PUBLIC_API_BASE_URL` in Render Dashboard → Frontend Service → Settings → Environment
-- Only variables starting with `NEXT_PUBLIC_` are accessible in the browser
-- After adding environment variables in Render, you must redeploy the service
-- See `frontend/.env.example` for reference
+**Production Notes:**
+- For Render deployment, set environment variables in the Render Dashboard
+- Only `NEXT_PUBLIC_*` variables are exposed to the browser
+- Never commit `.env` or `.env.local` files to version control
+- Use strong, randomly generated values for `SECRET_KEY` in production
 
-## 📚 Project Structure Details
+---
 
-### Backend Architecture
-- **api/** - RESTful API endpoints and routes
-- **core/** - Configuration, security, and core utilities
-- **models/** - SQLAlchemy ORM models
-- **schemas/** - Pydantic request/response schemas
-- **services/** - Business logic and database operations
-- **utils/** - Helper functions and utilities
+## 🔐 Authentication
 
-### Frontend Architecture
-- **app/** - Next.js 13+ app directory with pages and layouts
-- **components/** - Reusable React components
-- **hooks/** - Custom React hooks for state management
-- **lib/** - Utility functions and API client helpers
-- **public/** - Static assets (images, icons, etc.)
+The application uses **Supabase Authentication** with the following features:
+
+### Features
+- ✅ Email/Password authentication
+- ✅ Email validation (requires @spit.ac.in domain)
+- ✅ Password visibility toggle
+- ✅ Session management
+- ✅ Protected routes
+- ✅ Auto-redirect on authentication status
+
+### User Flow
+1. **Sign Up:** Users register with their @spit.ac.in email
+2. **Email Confirmation:** Supabase sends a confirmation email
+3. **Sign In:** Users log in with confirmed credentials
+4. **Session Management:** JWT tokens manage user sessions
+5. **Protected Access:** Unauthenticated users are redirected to login
+
+### Authentication Pages
+- **Login:** `/login` - Sign in with SPIT email
+- **Sign Up:** `/signup` - Register new account with validation
+- **Main App:** `/` - Protected dashboard (requires authentication)
+
+---
+
+## 📚 API Documentation
+
+The backend provides a RESTful API with the following endpoints: 
+
+### Base URL
+- **Local:** `http://localhost:8000/api/v1`
+- **Production:** `https://your-backend. onrender.com/api/v1`
+
+### API Groups
+
+#### 🔧 Assets (`/assets`)
+- `GET /assets` - List all assets with filters
+- `POST /assets` - Create new asset
+- `GET /assets/{id}` - Get asset details
+- `PUT /assets/{id}` - Update asset
+- `DELETE /assets/{id}` - Delete asset
+
+#### 📋 Assignments (`/assignments`)
+- `GET /assignments` - List assignments
+- `POST /assignments` - Create assignment
+- `PUT /assignments/{id}` - Update assignment
+- `DELETE /assignments/{id}` - Delete assignment
+
+#### 🗑️ Scrap (`/scrap`)
+- `GET /scrap` - List scrap entries with phase filtering
+- `POST /scrap` - Create scrap entry
+- `PUT /scrap/{id}` - Update scrap status/phase
+
+#### 🏷️ Masters (`/masters`)
+- Labs:  `/masters/labs`
+- Vendors: `/masters/vendors`
+- Categories: `/masters/categories`
+- Teachers: `/masters/teachers`
+- Scrap Phases: `/masters/scrap-phases`
+
+#### 📊 Reports (`/reports`)
+- Asset reports with various filters
+- Export functionality
+
+#### 💾 Backup (`/backup`)
+- `POST /backup/create` - Create database backup
+- `POST /backup/restore` - Restore from backup
+
+### Interactive Documentation
+Visit `http://localhost:8000/docs` for interactive Swagger UI documentation with request/response examples.
+
+---
+
+## 🗄️ Database Schema
+
+### Key Tables
+
+#### `asset`
+Stores deadstock asset information
+- `asset_id` (PK, UUID)
+- `asset_name`, `description`, `quantity`, `unit_price`, `total_cost`
+- `purchase_date`, `financial_year`
+- `category_id` (FK → category)
+- `vendor_id` (FK → vendor)
+- `lab_id` (FK → lab)
+- `status` (ACTIVE, ASSIGNED, SCRAPPED, UNDER_MAINTENANCE)
+- `condition`, `location`, `remarks`
+
+#### `asset_assignment`
+Tracks asset assignments to teachers
+- `assignment_id` (PK, UUID)
+- `asset_id` (FK → asset)
+- `teacher_id` (FK → teacher)
+- `assigned_quantity`, `assignment_date`, `return_date`
+- `current_location`, `remarks`
+
+#### `scrap`
+Manages scrap workflow
+- `scrap_id` (PK, UUID)
+- `asset_id` (FK → asset)
+- `phase_id` (FK → scrap_phase)
+- `quantity`, `initiated_date`, `completion_date`
+- `reason`, `remarks`, `status`
+
+#### `category`, `lab`, `vendor`, `teacher`, `scrap_phase`
+Master data tables with UUID primary keys
+
+### Financial Year Calculation
+Financial Year runs from **1 March to 28/29 February**: 
+- Purchase date **March-December**:  FY = Year to Year+1
+- Purchase date **January-February**: FY = Year-1 to Year
+
+Example:  Asset purchased on 15-Mar-2024 → FY:  2024-2025
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow existing code style and conventions
+- Write meaningful commit messages
+- Test your changes thoroughly
+- Update documentation as needed
+
+---
 
 ## 📄 License
 
@@ -261,5 +486,24 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
+## 👥 Credits
+
+Developed for the **Computer Engineering Department, SPIT (Sardar Patel Institute of Technology)**
+
+**Contributors:**
+- [Heet Shah (@heetsz)](https://github.com/heetsz)
+- [Shivsharan (@ShivsharanSanjawad)](https://github.com/shivsharansanjawad)
+- [Jovan (@jovan-05)](https://github.com/jovan-05)
+
+---
+
+## 📞 Support
+
+For issues, questions, or contributions: 
+- **GitHub Issues:** [Create an issue](https://github.com/heetsz/DeadStock-Management-Portal/issues)
+- **Live Demo:** [https://deadstock-management-portal.onrender.com](https://deadstock-management-portal.onrender. com)
+
+---
+
 **Hosted on:** [Render](https://render.com)  
-**Live Link:** https://deadstock-management-portal.onrender.com
+**© 2026 SPIT Computer Engineering.  All rights reserved.**
