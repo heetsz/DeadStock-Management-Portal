@@ -138,15 +138,7 @@ function LoginFormInner() {
                   </Button>
                 </form>
 
-                {/* Signup Link */}
-                <div className="mt-6 pt-4 border-t border-gray-200 text-center">
-                  <p className="text-sm text-gray-600">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/signup" className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">
-                      Sign up
-                    </Link>
-                  </p>
-                </div>
+                {/* Signup disabled */}
               </CardContent>
             </Card>
 

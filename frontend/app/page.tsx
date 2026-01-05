@@ -31,6 +31,8 @@ import MastersPage from "@/app/masters/page"
 import ReportsPage from "@/app/reports/page"
 import ScrapPage from "@/app/scrap/page"
 import BackupPage from "@/app/backup/page"
+import AdminPage from "@/app/admin/page"
+import { fetchUserRole, Role } from "@/lib/users"
 
 type TabKey =
   | "dashboard"
@@ -41,6 +43,7 @@ type TabKey =
   | "reports"
   | "scrap"
   | "backup"
+  | "admin"
 
 type NavItem = {
   label: string
@@ -48,7 +51,7 @@ type NavItem = {
   icon: React.ElementType
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
   { label: "Dashboard", key: "dashboard", icon: LayoutDashboard },
   { label: "Assets", key: "assets", icon: Laptop },
   { label: "Assignments", key: "assignments", icon: ClipboardList },
@@ -64,15 +67,26 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard")
   const [isLoading, setIsLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [role, setRole] = useState<Role>("user")
   const router = useRouter()
 
+  const navItems: NavItem[] = role === "admin"
+    ? [...baseNavItems, { label: "Admin", key: "admin", icon: Settings }]
+    : baseNavItems
   useEffect(() => {
     let mounted = true
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!mounted) return
       if (!data.session) {
         router.replace('/login')
       } else {
+        try {
+          const userEmail = data.session.user.email
+          if (userEmail) {
+            const r = await fetchUserRole(userEmail)
+            if (mounted) setRole(r)
+          }
+        } catch {}
         setIsLoading(false)
       }
     })
@@ -230,6 +244,7 @@ export default function Home() {
           {activeTab === "reports" && <ReportsPage />}
           {activeTab === "scrap" && <ScrapPage />}
           {activeTab === "backup" && <BackupPage />}
+          {activeTab === "admin" && <AdminPage />}
         </div>
       </section>
     </main>

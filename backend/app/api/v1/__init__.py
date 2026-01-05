@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import assets, assignments, scrap, masters, reports, filters, backup
+from app.api.v1 import assets, assignments, scrap, masters, reports, filters, backup, users
 
 api_router = APIRouter()
 
@@ -10,4 +10,5 @@ api_router.include_router(masters.router, prefix="/api/v1")
 api_router.include_router(reports.router, prefix="/api/v1")
 api_router.include_router(filters.router, prefix="/api/v1")
 api_router.include_router(backup.router, prefix="/api/v1")
+api_router.include_router(users.router, prefix="/api/v1")
 

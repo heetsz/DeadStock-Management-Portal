@@ -6,6 +6,7 @@ from app.models.asset import Asset
 from app.models.assignment import AssetAssignment
 from app.models.scrap import Scrap
 from app.models.scrap_phase import ScrapPhase
+from app.models.user import User
 
 __all__ = [
     "Lab",
@@ -16,5 +17,6 @@ __all__ = [
     "AssetAssignment",
     "Scrap",
     "ScrapPhase",
+    "User",
 ]
 

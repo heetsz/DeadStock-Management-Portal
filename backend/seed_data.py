@@ -3,7 +3,7 @@ Seed script to initialize database with default categories and sample data
 Run: python seed_data.py
 """
 from app.core.database import SessionLocal, init_db
-from app.models import Category, Lab, Vendor, Teacher, Asset, ScrapPhase
+from app.models import Category, Lab, Vendor, Teacher, Asset, ScrapPhase, User
 from app.schemas.asset import AssetCreate
 from app.utils.financial_year import calculate_financial_year
 from datetime import date
@@ -172,6 +172,19 @@ def main():
         seed_teachers(db)
         seed_scrap_phases(db)
         seed_sample_assets(db)
+        # Seed initial admin user
+        admin_email = "heet.shah123@spit.ac.in"
+        existing_admin = db.query(User).filter(User.email == admin_email).first()
+        if not existing_admin:
+            db.add(User(email=admin_email.lower(), role="admin"))
+            db.commit()
+            print(f"✓ Seeded admin user: {admin_email}")
+        else:
+            # Ensure role is admin if exists
+            if existing_admin.role != "admin":
+                existing_admin.role = "admin"
+                db.commit()
+                print(f"✓ Updated {admin_email} to admin role")
         
         print("\n✅ Database seeding completed successfully!")
     except Exception as e:

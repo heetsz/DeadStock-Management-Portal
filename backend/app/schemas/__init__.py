@@ -9,6 +9,7 @@ from app.schemas.assignment import (
     AssignmentCreate, AssignmentUpdate, AssignmentResponse, AssignmentReturn
 )
 from app.schemas.scrap import ScrapCreate, ScrapResponse, ScrapPhaseSummary
+from app.schemas.user import UserCreate, UserResponse, UserRoleResponse
 
 __all__ = [
     "LabCreate", "LabUpdate", "LabResponse",
@@ -18,5 +19,6 @@ __all__ = [
     "AssetCreate", "AssetUpdate", "AssetResponse", "AssetListResponse", "AssetFilters",
     "AssignmentCreate", "AssignmentUpdate", "AssignmentResponse", "AssignmentReturn",
     "ScrapCreate", "ScrapResponse", "ScrapPhaseSummary",
+    "UserCreate", "UserResponse", "UserRoleResponse",
 ]
 
