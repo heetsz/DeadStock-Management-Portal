@@ -489,11 +489,21 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 👥 Credits
 
 Developed for the **Computer Engineering Department, SPIT (Sardar Patel Institute of Technology)**
+## Contributors
 
-**Contributors:**
 - [Heet Shah (@heetsz)](https://github.com/heetsz)
-- [Shivsharan (@ShivsharanSanjawad)](https://github.com/shivsharansanjawad)
+- [Shivsharan Sanjawad (@ShivsharanSanjawad)](https://github.com/ShivsharanSanjawad)
 - [Jovan (@jovan-05)](https://github.com/jovan-05)
+- [Vitrag (@Vitrag00)](https://github.com/Vitrag00)
+- [Vinisha (@vinisha1014)](https://github.com/vinisha1014)
+- [Knovengel (@Knovengel)](https://github.com/Knovengel)
+- [APDoesCoding (@APDoesCoding18)](https://github.com/APDoesCoding18)
+- [Kalp Vora (@kalpvora04)](https://github.com/kalpvora04)
+- [Alley (@Alley1108)](https://github.com/Alley1108)
+- [Asmiya (@Asmiya135)](https://github.com/Asmiya135)
+- [Swapnil (@Swapnil565)](https://github.com/Swapnil565)
+- [MoonBot (@MoonBot-dev)](https://github.com/MoonBot-dev)
+
 
 ---
 
