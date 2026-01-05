@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     FRONTEND_ORIGINS: str = "http://localhost:3000,http://localhost:3001, https://dead-stock-management-portal-main-ir1g-3h7ozdl1o.vercel.app,https://deadstock-management-portal-main.onrender.com"
+    SUPABASE_URL: str | None = None
+    SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    SUPABASE_INVITE_REDIRECT_URL: str = "http://localhost:3000/signup"
     
     class Config:
         env_file = ".env"

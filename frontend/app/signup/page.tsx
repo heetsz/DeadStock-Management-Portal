@@ -61,16 +61,8 @@ function SignupFormInner() {
       }
 
       const fullName = deriveFullName(trimmedEmail)
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-
 export default function SignupPage() {
-  const router = useRouter()
-  useEffect(() => {
-    router.replace("/login")
-  }, [router])
+  // Route disabled: signup handled by admin-created accounts
   return null
 }
         options: {

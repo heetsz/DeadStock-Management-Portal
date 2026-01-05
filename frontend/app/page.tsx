@@ -235,7 +235,20 @@ export default function Home() {
 
       {/* Main Content */}
       <section className="flex-1 w-full min-w-0">
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="p-4 md:p-6 lg:p-8" id="main-content">
+          {role === 'user' && (
+            <style>{`
+              #main-content form input,
+              #main-content form select,
+              #main-content form textarea,
+              #main-content form button,
+              #main-content button[data-requires-admin],
+              #main-content .shadcn-button[data-requires-admin] {
+                pointer-events: none;
+                opacity: 0.6;
+              }
+            `}</style>
+          )}
           {activeTab === "dashboard" && <DashboardView />}
           {activeTab === "assets" && <AssetsPage />}
           {activeTab === "assignments" && <AssignmentsPage />}

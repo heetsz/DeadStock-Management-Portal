@@ -17,6 +17,7 @@ function LoginFormInner() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [sendingReset, setSendingReset] = useState(false)
 
   // If already authenticated, don't allow visiting login
   useEffect(() => {
@@ -34,14 +35,7 @@ function LoginFormInner() {
     e.preventDefault()
     setLoading(true)
     try {
-      const trimmed = email.trim()
-      const isSpitEmail = /@spit\.ac\.in$/i.test(trimmed)
-      if (!isSpitEmail) {
-        toast.error('Use SPIT email only', { description: 'Please sign in with your @spit.ac.in email.' })
-        setLoading(false)
-        return
-      }
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
       if (error) throw error
       toast.success('Logged in successfully')
       const redirect = searchParams.get('redirectedFrom') || '/'
@@ -50,6 +44,26 @@ function LoginFormInner() {
       toast.error('Login failed', { description: err?.message ?? 'Check credentials and try again.' })
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function onForgotPassword() {
+    const targetEmail = email.trim()
+    if (!targetEmail) {
+      toast.error('Enter your email first')
+      return
+    }
+    try {
+      setSendingReset(true)
+      const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+      const redirectTo = `${origin}/reset-password`
+      const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, { redirectTo })
+      if (error) throw error
+      toast.success('Password reset email sent', { description: `Check ${targetEmail} for the link` })
+    } catch (err: any) {
+      toast.error('Could not send reset email', { description: err?.message ?? 'Please try again' })
+    } finally {
+      setSendingReset(false)
     }
   }
 
@@ -124,7 +138,7 @@ function LoginFormInner() {
                   {/* Info Banner */}
                   <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                     <p className="text-xs text-indigo-700 font-medium">
-                      ✓ Use your @spit.ac.in email address to sign in
+                      ✓ Use your email address to sign in
                     </p>
                   </div>
 
@@ -138,7 +152,18 @@ function LoginFormInner() {
                   </Button>
                 </form>
 
-                {/* Signup disabled */}
+                {/* Actions */}
+                <div className="mt-4 flex items-center justify-between text-sm">
+                  <button type="button" onClick={onForgotPassword} className="text-indigo-600 hover:underline disabled:opacity-60" disabled={sendingReset}>
+                    {sendingReset ? 'Sending reset…' : 'Forgot password?'}
+                  </button>
+                  <span className="text-gray-500">Use your admin-created account</span>
+                </div>
+
+                {/* Signup is via admin only */}
+                <div className="mt-6 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
+                  Accounts are created by admin. Contact admin if you need access.
+                </div>
               </CardContent>
             </Card>
 

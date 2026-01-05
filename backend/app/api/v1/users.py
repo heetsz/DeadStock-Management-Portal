@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from app.core.config import settings
 from typing import List, Optional
 
 from app.core.database import get_db
@@ -28,13 +29,20 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
+# Deprecated: magic link invites are handled in Next.js; this endpoint is removed.
+
+
 @router.get("/role", response_model=UserRoleResponse)
 def get_role_by_email(email: str = Query(..., description="Email to check role for"), db: Session = Depends(get_db)):
     normalized = email.lower()
     user = db.query(User).filter(func.lower(User.email) == normalized).first()
     if not user:
-        # Hardcoded bootstrap admin fallback if not yet seeded
-        if normalized == "heet.shah123@spit.ac.in":
-            return UserRoleResponse(email=normalized, role="admin")
         return UserRoleResponse(email=normalized, role="user")
     return UserRoleResponse(email=user.email, role=user.role)
+
+
+@router.get("/exists")
+def user_exists(email: str = Query(..., description="Email to check existence"), db: Session = Depends(get_db)):
+    normalized = email.lower()
+    exists = db.query(User).filter(func.lower(User.email) == normalized).first() is not None
+    return {"email": normalized, "exists": exists}

@@ -11,11 +11,29 @@ import { RefreshCcw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LabelList } from "recharts"
 import { supabase } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { fetchUserRole, Role } from "@/lib/users"
+
+function deriveDisplayName(email: string, meta: any): string {
+  const first = (meta?.first_name as string | undefined)?.toString().trim()
+  const last = (meta?.last_name as string | undefined)?.toString().trim()
+  const full = (meta?.full_name as string | undefined)?.toString().trim()
+  const toTitle = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s
+  if (first || last) {
+    return [toTitle(first || ""), toTitle(last || "")].filter(Boolean).join(" ")
+  }
+  if (full) return full
+  const local = (email || "").split("@")[0].toLowerCase()
+  const parts = local.split(/[^a-zA-Z]+/).filter(Boolean)
+  if (parts.length === 0) return email
+  if (parts.length === 1) return toTitle(parts[0])
+  return `${toTitle(parts[0])} ${toTitle(parts[1])}`
+}
 
 export default function DashboardView() {
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [displayName, setDisplayName] = useState<string | null>(null)
+  const [role, setRole] = useState<Role | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -26,7 +44,11 @@ export default function DashboardView() {
         return
       }
       const meta = user.user_metadata as any
-      setDisplayName(meta?.full_name || user.email || 'User')
+      setDisplayName(deriveDisplayName(user.email || 'User', meta))
+      const email = user.email
+      if (email) {
+        fetchUserRole(email).then(r => setRole(r)).catch(() => setRole(null))
+      }
     })
   }, [router])
 
@@ -70,7 +92,12 @@ export default function DashboardView() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{displayName ? `Hello, ${displayName.split(" ")[0]} 👋 ` : 'Dashboard'}</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{displayName ? `Hello, ${displayName.split(" ")[0]} 👋 ` : 'Dashboard'}</h1>
+            {role && (
+              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">Role: {role}</Badge>
+            )}
+          </div>
           <p className="text-gray-600">Overview of deadstock & asset metrics</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">

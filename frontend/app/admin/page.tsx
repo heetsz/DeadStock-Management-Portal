@@ -46,17 +46,22 @@ export default function AdminPage() {
     setSubmitting(true)
     try {
       const trimmed = email.trim()
-      if (!/@spit\.ac\.in$/i.test(trimmed)) {
-        toast.error("Use SPIT email only", { description: "Please enter an @spit.ac.in email." })
-        return
-      }
       await createUser(trimmed, newRole)
-      toast.success("User added")
+      // Sign up the user with default password via Next.js API
+      const res = await fetch(`/api/admin-signup?email=${encodeURIComponent(trimmed)}`, { method: 'POST' })
+      if (!res.ok) {
+        let detail: any = null
+        try { detail = await res.json() } catch {}
+        throw new Error(typeof detail?.detail === 'string' ? detail.detail : JSON.stringify(detail?.detail ?? detail ?? { status: res.status }))
+      }
+      const json = await res.json()
+      toast.success("User signed up", { description: `Default password set: ${json?.defaultPassword || 'Temp#123456'}` })
       setEmail("")
       const list = await listUsers()
       setUsers(list)
     } catch (err: any) {
-      toast.error("Failed to add user", { description: err?.response?.data?.detail ?? "Please try again" })
+      const detail = err?.response?.data?.detail || err?.message
+      toast.error("Failed to add/invite user", { description: typeof detail === 'string' ? detail : JSON.stringify(detail) })
     } finally {
       setSubmitting(false)
     }
