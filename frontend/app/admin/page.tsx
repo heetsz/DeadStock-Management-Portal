@@ -78,7 +78,7 @@ export default function AdminPage() {
           <CardTitle>Admin</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-600">You don't have permission to view this page.</div>
+          <div className="text-sm text-gray-600">You don&apos;t have permission to view this page.</div>
         </CardContent>
       </Card>
     )
